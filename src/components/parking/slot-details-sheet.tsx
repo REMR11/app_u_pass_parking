@@ -36,21 +36,41 @@ export function SlotDetailsSheet({
         </div>
 
         <div className="px-5 pb-8 pt-3">
-          {/* Location context — small, secondary */}
+          {/* Location context */}
           <p className="text-xs text-muted-foreground uppercase tracking-wide">
             {lot.name} &middot; {level.name}
           </p>
 
-          {/* Slot code — hero element, must be readable at a glance */}
+          {/* Slot code + category */}
           <div className="flex items-end justify-between mt-2 mb-4">
             <div>
               <p className="text-muted-foreground text-sm">Espacio seleccionado</p>
-              <h2 className="text-5xl font-black text-foreground leading-none mt-0.5">
-                {slot.code}
-              </h2>
+              <div className="flex items-center gap-3 mt-0.5">
+                <h2 className="text-5xl font-black text-foreground leading-none">
+                  {slot.code}
+                </h2>
+                {/* Category badge */}
+                {slot.category === "accessible" && (
+                  <span className="text-sm font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-full">
+                    ♿ Discapacidad
+                  </span>
+                )}
+                {slot.category === "elderly" && (
+                  <span className="text-sm font-semibold text-yellow-700 bg-yellow-50 border border-yellow-200 px-2.5 py-1 rounded-full">
+                    🧓 Adulto mayor
+                  </span>
+                )}
+              </div>
+              {/* Proximity hint */}
+              {slot.entranceProximity <= 3 && (
+                <p className="text-xs text-success font-medium mt-1.5 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
+                  Cerca de la entrada
+                </p>
+              )}
             </div>
             {/* Status badge */}
-            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-success bg-success/10 px-3 py-1.5 rounded-full">
+            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-success bg-success/10 px-3 py-1.5 rounded-full flex-shrink-0">
               <span className="w-2 h-2 rounded-full bg-success" />
               Disponible
             </span>

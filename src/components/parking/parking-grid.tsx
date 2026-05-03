@@ -1,6 +1,7 @@
 "use client";
 
 import type { ParkingSlot, ParkingLevel } from "@/domain/parking/types";
+import { FloorPlanMap } from "./floor-plan-map";
 
 interface ParkingGridProps {
   level: ParkingLevel;
@@ -9,10 +10,25 @@ interface ParkingGridProps {
   onSelectSlot: (slot: ParkingSlot) => void;
 }
 
-// Status-driven colours -------------------------------------------------------
+// Category config for the list view
+const CATEGORY_CONFIG = {
+  accessible: {
+    badge: "♿ Discapacidad",
+    badgeClass: "bg-blue-50 text-blue-700 border-blue-200",
+  },
+  elderly: {
+    badge: "🧓 A. Mayor",
+    badgeClass: "bg-yellow-50 text-yellow-700 border-yellow-200",
+  },
+  standard: {
+    badge: null,
+    badgeClass: "",
+  },
+} as const;
+
 const STATUS_CONFIG = {
   available: {
-    bg: "bg-muted/60",
+    bg: "bg-background",
     border: "border-muted-foreground/20",
     text: "text-foreground",
     dot: "bg-success",
@@ -20,10 +36,10 @@ const STATUS_CONFIG = {
     interactive: true,
   },
   occupied: {
-    bg: "bg-primary/10",
-    border: "border-primary/20",
-    text: "text-primary/60",
-    dot: "bg-primary",
+    bg: "bg-muted/40",
+    border: "border-muted/60",
+    text: "text-muted-foreground",
+    dot: "bg-muted-foreground/40",
     label: "Ocupado",
     interactive: false,
   },
@@ -45,8 +61,8 @@ const STATUS_CONFIG = {
   },
 } as const;
 
-// Single slot button ----------------------------------------------------------
-function SlotButton({
+// ── Single slot row ──────────────────────────────────────────────────────────
+function SlotRow({
   slot,
   isSelected,
   onSelect,
@@ -57,7 +73,8 @@ function SlotButton({
 }) {
   const effectiveStatus = isSelected ? "selected" : slot.status;
   const cfg = STATUS_CONFIG[effectiveStatus];
-  const isInteractive = slot.status === "available" || isSelected;
+  const catCfg = CATEGORY_CONFIG[slot.category];
+  const isInteractive = slot.status === "available";
 
   return (
     <button
@@ -65,28 +82,50 @@ function SlotButton({
       disabled={!isInteractive}
       aria-label={`Espacio ${slot.code} — ${cfg.label}`}
       className={`
-        relative flex items-center gap-3 w-full px-4 py-3.5
+        relative flex items-center gap-3 w-full px-4 py-3
         rounded-2xl border-2 transition-all duration-150 text-left
         ${cfg.bg} ${cfg.border}
-        ${isSelected ? "shadow-md scale-[1.02]" : ""}
-        ${isInteractive ? "active:scale-[0.97] cursor-pointer" : "cursor-default opacity-70"}
+        ${isSelected ? "shadow-md ring-2 ring-accent/30" : ""}
+        ${isInteractive ? "active:scale-[0.97] cursor-pointer" : "cursor-default"}
       `}
     >
-      {/* Slot number — large, easy to read at a glance */}
-      <span className={`text-xl font-bold w-14 text-center flex-shrink-0 ${cfg.text}`}>
+      {/* Slot code — large for at-a-glance reading */}
+      <span
+        className={`text-lg font-bold w-12 text-center flex-shrink-0 font-mono ${
+          isSelected ? "text-accent" : cfg.text
+        }`}
+      >
         {slot.code}
       </span>
 
-      {/* Status indicator */}
-      <div className="flex items-center gap-2 flex-1 min-w-0">
-        <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${cfg.dot}`} />
-        <span className={`text-sm font-medium ${cfg.text}`}>{cfg.label}</span>
+      {/* Status + category badges */}
+      <div className="flex-1 flex items-center gap-2 flex-wrap min-w-0">
+        <span className={`flex items-center gap-1.5 text-sm font-medium ${cfg.text}`}>
+          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${cfg.dot}`} />
+          {cfg.label}
+        </span>
+        {catCfg.badge && (
+          <span
+            className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${catCfg.badgeClass}`}
+          >
+            {catCfg.badge}
+          </span>
+        )}
+        {/* Proximity indicator */}
+        {slot.entranceProximity <= 3 && slot.status === "available" && (
+          <span className="text-[11px] font-medium text-success flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
+            Cerca de acceso
+          </span>
+        )}
       </div>
 
-      {/* Arrow only for available/selected */}
+      {/* Arrow for available slots only */}
       {isInteractive && (
         <svg
-          className={`w-5 h-5 flex-shrink-0 ${isSelected ? "text-accent" : "text-muted-foreground"}`}
+          className={`w-5 h-5 flex-shrink-0 ${
+            isSelected ? "text-accent" : "text-muted-foreground"
+          }`}
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -99,7 +138,7 @@ function SlotButton({
   );
 }
 
-// Aisle group ----------------------------------------------------------------
+// ── Aisle group ──────────────────────────────────────────────────────────────
 function AisleGroup({
   aisleName,
   slots,
@@ -117,7 +156,7 @@ function AisleGroup({
   return (
     <div>
       {/* Aisle header */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-2.5">
         <div className="flex items-center gap-2">
           <div className="w-1 h-5 bg-primary rounded-full" />
           <span className="font-semibold text-sm text-foreground">
@@ -125,7 +164,7 @@ function AisleGroup({
           </span>
         </div>
         <span
-          className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+          className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
             available > 0
               ? "bg-success/10 text-success"
               : "bg-muted text-muted-foreground"
@@ -135,10 +174,9 @@ function AisleGroup({
         </span>
       </div>
 
-      {/* Slot list */}
-      <div className="flex flex-col gap-2.5">
+      <div className="flex flex-col gap-2">
         {slots.map((slot) => (
-          <SlotButton
+          <SlotRow
             key={slot.id}
             slot={slot}
             isSelected={slot.id === selectedSlotId}
@@ -150,7 +188,7 @@ function AisleGroup({
   );
 }
 
-// Main exported component ----------------------------------------------------
+// ── Main exported component ──────────────────────────────────────────────────
 export function ParkingGrid({
   level,
   slots,
@@ -170,36 +208,44 @@ export function ParkingGrid({
   );
 
   const totalAvailable = slots.filter((s) => s.status === "available").length;
+  const accessibleAvailable = slots.filter(
+    (s) => s.category === "accessible" && s.status === "available"
+  ).length;
+  const elderlyAvailable = slots.filter(
+    (s) => s.category === "elderly" && s.status === "available"
+  ).length;
 
   return (
     <div>
-      {/* Summary bar */}
-      <div className="flex items-center justify-between mb-5">
-        <p className="text-sm text-muted-foreground">
-          <span className="font-semibold text-foreground text-base">
-            {totalAvailable}
-          </span>{" "}
-          {totalAvailable === 1 ? "espacio libre" : "espacios libres"}
-        </p>
-        {/* Legend */}
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-success" />
-            Libre
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-primary" />
-            Ocupado
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-accent" />
-            Tu selección
-          </span>
-        </div>
+      {/* ── Floor plan mini-map ─────────────────────────────────────────── */}
+      <div className="bg-background rounded-2xl border border-muted p-4 mb-5 shadow-sm">
+        <FloorPlanMap
+          level={level}
+          selectedSlotId={selectedSlotId}
+          onSelectSlot={onSelectSlot}
+        />
       </div>
 
-      {/* Aisles */}
-      <div className="flex flex-col gap-6">
+      {/* ── Availability summary chips ──────────────────────────────────── */}
+      <div className="flex gap-2 flex-wrap mb-5">
+        <div className="flex items-center gap-1.5 bg-success/10 text-success text-sm font-semibold px-3 py-1.5 rounded-full">
+          <span className="w-2 h-2 rounded-full bg-success" />
+          {totalAvailable} libres
+        </div>
+        {accessibleAvailable > 0 && (
+          <div className="flex items-center gap-1.5 bg-blue-50 text-blue-700 text-sm font-semibold px-3 py-1.5 rounded-full border border-blue-100">
+            ♿ {accessibleAvailable} accesibles
+          </div>
+        )}
+        {elderlyAvailable > 0 && (
+          <div className="flex items-center gap-1.5 bg-yellow-50 text-yellow-700 text-sm font-semibold px-3 py-1.5 rounded-full border border-yellow-100">
+            🧓 {elderlyAvailable} adulto mayor
+          </div>
+        )}
+      </div>
+
+      {/* ── Aisle list ──────────────────────────────────────────────────── */}
+      <div className="flex flex-col gap-5">
         {aisleEntries.map(([rowNum, rowSlots], i) => (
           <AisleGroup
             key={rowNum}

@@ -1,53 +1,176 @@
-import type { ParkingLot, ParkingSlot, ParkingLevel } from "@/domain/parking/types";
+import type { ParkingLot, ParkingSlot, ParkingLevel, FloorPlanCell, CellType } from "@/domain/parking/types";
 
 /**
- * Mock data for parking lots with slot visualization.
+ * Mock data for parking lots with pre-designed floor-plan layouts.
  * Replace with real API/database integration.
  */
 
-function generateSlots(levelId: string, rows: number, cols: number): ParkingSlot[] {
+// ──────────────────────────────────────────────────────────────────────────────
+// LEVEL GENERATOR (pre-designed layouts per lot)
+// ──────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Builds a simple parking level layout with accessibility zones.
+ * 
+ * Layout key:
+ *  E = entrance
+ *  R = road/aisle
+ *  S = standard slot
+ *  A = accessible slot
+ *  O = elderly slot
+ *  W = wall/pillar
+ *  . = empty/outside
+ *
+ * entranceProximity: 1 = closest to entrance, higher = farther
+ */
+
+function buildLayoutA(levelId: string): ParkingLevel {
+  // 8x12 grid — compact layout for regional centers
+  const grid: Array<CellType[]> = [
+    ["empty", "empty", "entrance", "entrance", "entrance", "empty", "empty", "empty", "empty", "empty", "empty", "empty"],
+    ["empty", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "empty"],
+    ["wall", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "wall"],
+    ["wall", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "wall"],
+    ["wall", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "wall"],
+    ["wall", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "wall"],
+    ["wall", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "wall"],
+    ["empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty"],
+  ];
+
   const slots: ParkingSlot[] = [];
-  const statuses: Array<"available" | "occupied"> = ["available", "occupied"];
-  
-  for (let row = 0; row < rows; row++) {
-    for (let col = 0; col < cols; col++) {
-      const isOccupied = Math.random() > 0.3;
-      slots.push({
-        id: `${levelId}-slot-${row}-${col}`,
-        code: `${String.fromCharCode(65 + row)}-${col + 1}`,
-        status: isOccupied ? "occupied" : "available",
-        row,
-        col,
-      });
+  const floorPlan: FloorPlanCell[][] = [];
+  let slotIndex = 0;
+
+  for (let r = 0; r < grid.length; r++) {
+    const planRow: FloorPlanCell[] = [];
+    for (let c = 0; c < grid[r].length; c++) {
+      const cellType = grid[r][c];
+      const cell: FloorPlanCell = { type: cellType };
+
+      if (cellType === "entrance") {
+        cell.label = "E1";
+      } else if (cellType === "slot") {
+        // Accessible slots near entrance (row 2, first two)
+        // Elderly slots near entrance (row 2, next two)
+        const isAccessible = r === 2 && (c === 1 || c === 2);
+        const isElderly = r === 2 && (c === 3 || c === 4);
+        const category = isAccessible ? "accessible" : isElderly ? "elderly" : "standard";
+        const proximityScore = Math.abs(r - 0) + Math.abs(c - 3); // Distance from entrance row 0, center col 3
+
+        const slotCode = `${String.fromCharCode(65 + r)}-${slotIndex + 1}`;
+        const slotId = `${levelId}-slot-${slotIndex}`;
+        slotIndex++;
+
+        // Randomly occupied
+        const isOccupied = Math.random() > 0.4;
+        
+        slots.push({
+          id: slotId,
+          code: slotCode,
+          status: isOccupied ? "occupied" : "available",
+          category,
+          row: r,
+          col: c,
+          entranceProximity: proximityScore,
+        });
+
+        cell.slotId = slotId;
+      }
+
+      planRow.push(cell);
     }
+    floorPlan.push(planRow);
   }
-  return slots;
+
+  return {
+    id: levelId,
+    name: "Nivel 1",
+    aisle: "Pasillo A",
+    slots,
+    floorPlan,
+    gridCols: grid[0].length,
+    gridRows: grid.length,
+  };
 }
 
-function generateLevels(lotId: string, count: number): ParkingLevel[] {
-  const aisles = ["A", "B", "C", "D"];
-  return Array.from({ length: count }, (_, i) => {
-    const levelId = `${lotId}-level-${i + 1}`;
-    return {
-      id: levelId,
-      name: `Nivel ${i + 1}`,
-      aisle: `Pasillo ${aisles[i % aisles.length]}`,
-      slots: generateSlots(levelId, 4, 6),
-    };
-  });
+function buildLayoutB(levelId: string): ParkingLevel {
+  // 10x16 grid — large commercial center with multiple aisles
+  const grid: Array<CellType[]> = [
+    ["empty", "empty", "empty", "entrance", "entrance", "entrance", "entrance", "entrance", "entrance", "empty", "empty", "empty", "empty", "empty", "empty", "empty"],
+    ["empty", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "empty"],
+    ["wall", "slot", "slot", "slot", "slot", "road", "slot", "slot", "slot", "slot", "road", "slot", "slot", "slot", "slot", "wall"],
+    ["wall", "slot", "slot", "slot", "slot", "road", "slot", "slot", "slot", "slot", "road", "slot", "slot", "slot", "slot", "wall"],
+    ["wall", "slot", "slot", "slot", "slot", "road", "slot", "slot", "slot", "slot", "road", "slot", "slot", "slot", "slot", "wall"],
+    ["wall", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "wall"],
+    ["wall", "slot", "slot", "slot", "slot", "road", "slot", "slot", "slot", "slot", "road", "slot", "slot", "slot", "slot", "wall"],
+    ["wall", "slot", "slot", "slot", "slot", "road", "slot", "slot", "slot", "slot", "road", "slot", "slot", "slot", "slot", "wall"],
+    ["wall", "slot", "slot", "slot", "slot", "road", "slot", "slot", "slot", "slot", "road", "slot", "slot", "slot", "slot", "wall"],
+    ["empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty"],
+  ];
+
+  const slots: ParkingSlot[] = [];
+  const floorPlan: FloorPlanCell[][] = [];
+  let slotIndex = 0;
+
+  for (let r = 0; r < grid.length; r++) {
+    const planRow: FloorPlanCell[] = [];
+    for (let c = 0; c < grid[r].length; c++) {
+      const cellType = grid[r][c];
+      const cell: FloorPlanCell = { type: cellType };
+
+      if (cellType === "entrance") {
+        cell.label = c < 6 ? "E1" : "E2";
+      } else if (cellType === "slot") {
+        // Accessible: row 2, col 1-2
+        // Elderly: row 2, col 3-4
+        const isAccessible = r === 2 && (c === 1 || c === 2);
+        const isElderly = r === 2 && (c === 3 || c === 4);
+        const category = isAccessible ? "accessible" : isElderly ? "elderly" : "standard";
+        const proximityScore = Math.abs(r - 0) + Math.abs(c - 5); // Distance from entrance
+
+        const slotCode = `${String.fromCharCode(65 + Math.floor(slotIndex / 15))}-${(slotIndex % 15) + 1}`;
+        const slotId = `${levelId}-slot-${slotIndex}`;
+        slotIndex++;
+
+        const isOccupied = Math.random() > 0.35;
+        
+        slots.push({
+          id: slotId,
+          code: slotCode,
+          status: isOccupied ? "occupied" : "available",
+          category,
+          row: r,
+          col: c,
+          entranceProximity: proximityScore,
+        });
+
+        cell.slotId = slotId;
+      }
+
+      planRow.push(cell);
+    }
+    floorPlan.push(planRow);
+  }
+
+  return {
+    id: levelId,
+    name: "Nivel 1",
+    aisle: "Pasillo Principal",
+    slots,
+    floorPlan,
+    gridCols: grid[0].length,
+    gridRows: grid.length,
+  };
 }
 
 // Default center: San Salvador, El Salvador (Colonia Escalon / Zona Rosa)
 export const DEFAULT_CENTER = { lat: 13.7006, lng: -89.2295 };
 
 /**
- * Parking lots with real El Salvador capacity data.
+ * Parking lots with real El Salvador capacity data and pre-designed layouts.
  *
  * Large commercial centers  → totalCapacity 1,500–3,000  facilityType "large"
  * Regional / local centers  → totalCapacity  100–300     facilityType "regional"
- *
- * totalSlots in this mock represents the monitored zone displayed in-app
- * (a subset of total physical capacity for demo purposes).
  */
 const parkingLots: ParkingLot[] = [
   // ── LARGE COMMERCIAL CENTERS ───────────────────────────────────────────
@@ -62,9 +185,13 @@ const parkingLots: ParkingLot[] = [
     currency: "USD",
     facilityType: "large",
     totalCapacity: 2800,
-    levels: generateLevels("lot-001", 5),
-    totalSlots: 120,
-    availableSlots: 48,
+    levels: [
+      buildLayoutB("lot-001-level-1"),
+      buildLayoutB("lot-001-level-2"),
+      buildLayoutB("lot-001-level-3"),
+    ],
+    totalSlots: 180,
+    availableSlots: 65,
     rating: 4.3,
   },
   {
@@ -78,9 +205,14 @@ const parkingLots: ParkingLot[] = [
     currency: "USD",
     facilityType: "large",
     totalCapacity: 3000,
-    levels: generateLevels("lot-002", 6),
-    totalSlots: 140,
-    availableSlots: 22,
+    levels: [
+      buildLayoutB("lot-002-level-1"),
+      buildLayoutB("lot-002-level-2"),
+      buildLayoutB("lot-002-level-3"),
+      buildLayoutB("lot-002-level-4"),
+    ],
+    totalSlots: 240,
+    availableSlots: 45,
     rating: 4.6,
   },
   {
@@ -94,9 +226,13 @@ const parkingLots: ParkingLot[] = [
     currency: "USD",
     facilityType: "large",
     totalCapacity: 1800,
-    levels: generateLevels("lot-003", 4),
-    totalSlots: 96,
-    availableSlots: 37,
+    levels: [
+      buildLayoutB("lot-003-level-1"),
+      buildLayoutB("lot-003-level-2"),
+      buildLayoutB("lot-003-level-3"),
+    ],
+    totalSlots: 180,
+    availableSlots: 72,
     rating: 4.7,
   },
   {
@@ -110,9 +246,12 @@ const parkingLots: ParkingLot[] = [
     currency: "USD",
     facilityType: "large",
     totalCapacity: 1600,
-    levels: generateLevels("lot-004", 4),
-    totalSlots: 80,
-    availableSlots: 14,
+    levels: [
+      buildLayoutB("lot-004-level-1"),
+      buildLayoutB("lot-004-level-2"),
+    ],
+    totalSlots: 120,
+    availableSlots: 22,
     rating: 4.4,
   },
   // ── REGIONAL / LOCAL CENTERS ───────────────────────────────────────────
@@ -127,9 +266,9 @@ const parkingLots: ParkingLot[] = [
     currency: "USD",
     facilityType: "regional",
     totalCapacity: 180,
-    levels: generateLevels("lot-005", 1),
-    totalSlots: 48,
-    availableSlots: 11,
+    levels: [buildLayoutA("lot-005-level-1")],
+    totalSlots: 40,
+    availableSlots: 14,
     rating: 4.0,
   },
   {
@@ -143,9 +282,9 @@ const parkingLots: ParkingLot[] = [
     currency: "USD",
     facilityType: "regional",
     totalCapacity: 280,
-    levels: generateLevels("lot-006", 2),
-    totalSlots: 60,
-    availableSlots: 28,
+    levels: [buildLayoutA("lot-006-level-1"), buildLayoutA("lot-006-level-2")],
+    totalSlots: 80,
+    availableSlots: 38,
     rating: 3.9,
   },
   {
@@ -159,9 +298,9 @@ const parkingLots: ParkingLot[] = [
     currency: "USD",
     facilityType: "regional",
     totalCapacity: 120,
-    levels: generateLevels("lot-007", 2),
+    levels: [buildLayoutA("lot-007-level-1")],
     totalSlots: 40,
-    availableSlots: 6,
+    availableSlots: 8,
     rating: 4.2,
   },
   {
@@ -175,9 +314,9 @@ const parkingLots: ParkingLot[] = [
     currency: "USD",
     facilityType: "regional",
     totalCapacity: 160,
-    levels: generateLevels("lot-008", 2),
-    totalSlots: 44,
-    availableSlots: 19,
+    levels: [buildLayoutA("lot-008-level-1"), buildLayoutA("lot-008-level-2")],
+    totalSlots: 80,
+    availableSlots: 28,
     rating: 4.1,
   },
 ];
