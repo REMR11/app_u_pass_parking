@@ -61,10 +61,22 @@ body {
 }
 
 /* Safe area padding for mobile devices */
-@supports (padding-bottom: env(safe-area-inset-bottom)) {
-  .pb-safe {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
+.pb-safe {
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+.pt-safe {
+  padding-top: max(0px, env(safe-area-inset-top));
+}
+.mb-safe {
+  margin-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+/* dvh — dynamic viewport height, excludes browser chrome on mobile */
+.h-dvh {
+  height: 100dvh;
+}
+.min-h-dvh {
+  min-height: 100dvh;
 }
 
 /* Hide scrollbar utility */

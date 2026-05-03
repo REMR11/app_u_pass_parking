@@ -166,58 +166,81 @@ export default function ParkingPage() {
   // MOBILE: Slots View
   // ==========================================
   if (viewMode === "slots" && selectedLot && isMobile) {
+    const availableInLevel = currentLevel
+      ? currentLevel.slots.filter((s) => s.status === "available").length
+      : 0;
+
     return (
-      <div className="min-h-screen bg-background flex flex-col">
-        {/* Compact header */}
-        <header className="bg-primary text-primary-foreground px-4 py-3 flex items-center gap-3 safe-area-top">
-          <button
-            onClick={handleBackToMap}
-            className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center active:bg-white/30 transition-colors"
-            aria-label="Volver"
-          >
-            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M19 12H5M12 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <div className="flex-1 min-w-0">
-            <h1 className="font-bold text-lg truncate">{selectedLot.name}</h1>
-            <p className="text-sm text-white/80">{selectedLot.availableSlots} lugares libres</p>
+      <div className="h-dvh bg-background flex flex-col overflow-hidden">
+        {/* Header — full bleed, accounts for status bar */}
+        <header className="bg-primary text-primary-foreground px-4 pt-safe flex-shrink-0">
+          <div className="flex items-center gap-3 py-3">
+            <button
+              onClick={handleBackToMap}
+              className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center active:bg-white/30 transition-colors flex-shrink-0"
+              aria-label="Volver"
+            >
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <div className="flex-1 min-w-0">
+              <h1 className="font-bold text-base leading-tight truncate">{selectedLot.name}</h1>
+              <p className="text-sm text-white/80">{selectedLot.address}</p>
+            </div>
+            {/* Available pill — high contrast green on dark */}
+            <div className="flex-shrink-0 bg-success rounded-full px-3 py-1.5 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-white" />
+              <span className="text-white text-sm font-bold">{availableInLevel}</span>
+            </div>
           </div>
         </header>
 
-        {/* Level tabs - large touch targets */}
-        <div className="px-4 py-3 bg-muted/50">
+        {/* Level tabs — large tap targets, high contrast active state */}
+        <div className="bg-foreground px-4 py-3 flex-shrink-0">
           <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-            {selectedLot.levels.map((level) => (
-              <button
-                key={level.id}
-                onClick={() => setSelectedLevelId(level.id)}
-                className={`flex-shrink-0 px-5 py-3 rounded-xl font-semibold text-base transition-colors ${
-                  selectedLevelId === level.id
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-white text-foreground border border-muted"
-                }`}
-              >
-                {level.name}
-              </button>
-            ))}
+            {selectedLot.levels.map((level) => {
+              const lvlAvailable = level.slots.filter((s) => s.status === "available").length;
+              const isActive = selectedLevelId === level.id;
+              return (
+                <button
+                  key={level.id}
+                  onClick={() => setSelectedLevelId(level.id)}
+                  className={`flex-shrink-0 flex flex-col items-center px-5 py-2.5 rounded-xl font-bold text-sm transition-all min-w-[72px] ${
+                    isActive
+                      ? "bg-primary text-white shadow-lg shadow-primary/40 scale-105"
+                      : "bg-white/10 text-white/70"
+                  }`}
+                >
+                  <span className="text-base font-black">{level.name}</span>
+                  <span className={`text-xs mt-0.5 ${isActive ? "text-white/90" : "text-white/50"}`}>
+                    {lvlAvailable} libres
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Parking grid */}
-        {currentLevel && (
-          <div className="flex-1 px-4 py-4 overflow-auto">
-            <p className="text-sm text-muted-foreground mb-3">{currentLevel.aisle}</p>
-            <ParkingGrid
-              level={currentLevel}
-              slots={currentLevel.slots}
-              selectedSlotId={selectedSlot?.id || null}
-              onSelectSlot={handleSelectSlot}
-            />
+        {/* Scrollable grid */}
+        {currentLevel ? (
+          <div className="flex-1 overflow-y-auto overscroll-contain">
+            <div className="px-4 py-4 pb-40">
+              <ParkingGrid
+                level={currentLevel}
+                slots={currentLevel.slots}
+                selectedSlotId={selectedSlot?.id || null}
+                onSelectSlot={handleSelectSlot}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 flex items-center justify-center text-muted-foreground">
+            Selecciona un nivel
           </div>
         )}
 
-        {/* Slot details sheet */}
+        {/* Slot details — fixed bottom panel */}
         <SlotDetailsSheet
           slot={selectedSlot}
           level={currentLevel}
@@ -233,10 +256,14 @@ export default function ParkingPage() {
   // MOBILE: Map View (Driver-First Design)
   // ==========================================
   if (isMobile) {
+    // Height of the bottom card so filters sit right above it
+    const BOTTOM_CARD_H = 96; // px approximate
+    const FILTER_BOTTOM = BOTTOM_CARD_H + 12;
+
     return (
-      <div className="h-screen flex flex-col bg-background">
-        {/* Full-screen map */}
-        <div className="flex-1 relative">
+      <div className="h-dvh flex flex-col bg-background overflow-hidden">
+        {/* Map — fills all available space between top and bottom card */}
+        <div className="flex-1 relative overflow-hidden">
           <ParkingMap
             lots={filteredLots}
             userLocation={userLocation}
@@ -246,23 +273,49 @@ export default function ParkingPage() {
             filterMode={getMapFilterMode()}
           />
 
-          {/* Top bar - minimal info */}
-          <div className="absolute top-4 left-4 right-4 flex items-center gap-3 z-[1000]">
-            {/* Logo pill */}
-            <div className="bg-primary text-primary-foreground px-4 py-2 rounded-full flex items-center gap-2 shadow-lg">
-              <span className="font-bold text-lg">U</span>
-              <span className="font-semibold">U-Pass</span>
-            </div>
-            
-            {/* Quick stats */}
-            <div className="bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg flex items-center gap-2 text-sm">
-              <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
-              <span className="font-semibold text-foreground">{availableCount}</span>
-              <span className="text-muted-foreground">disponibles</span>
+          {/* ── TOP BAR ── status-bar aware, high contrast */}
+          <div className="absolute top-0 left-0 right-0 pt-safe px-4 pb-3 z-[1000]"
+               style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 100%)" }}>
+            <div className="flex items-center gap-3 pt-3">
+              {/* Brand */}
+              <div className="bg-primary text-white px-4 py-2 rounded-full flex items-center gap-2 shadow-xl border border-white/20">
+                <span className="font-black text-base tracking-tight">U-Pass</span>
+              </div>
+              {/* Slots counter */}
+              <div className="bg-black/60 backdrop-blur-sm text-white px-4 py-2 rounded-full flex items-center gap-2 shadow-lg border border-white/10">
+                <span className="w-2 h-2 rounded-full bg-success flex-shrink-0 animate-pulse" />
+                <span className="font-bold text-sm">{availableCount}</span>
+                <span className="text-white/70 text-sm">disponibles</span>
+              </div>
             </div>
           </div>
 
-          {/* My location button - large and accessible */}
+          {/* ── ZOOM BUTTONS ── above location button, same round white/blue style */}
+          <div
+            className="absolute right-4 z-[1000] flex flex-col gap-2"
+            style={{ bottom: `${FILTER_BOTTOM + 64 + 56 + 12}px` }}
+          >
+            <button
+              onClick={() => window.dispatchEvent(new Event("map-zoom-in"))}
+              className="w-14 h-14 bg-white rounded-full shadow-xl border-2 border-primary/20 flex items-center justify-center active:scale-95 transition-all"
+              aria-label="Acercar"
+            >
+              <svg className="w-6 h-6 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            </button>
+            <button
+              onClick={() => window.dispatchEvent(new Event("map-zoom-out"))}
+              className="w-14 h-14 bg-white rounded-full shadow-xl border-2 border-primary/20 flex items-center justify-center active:scale-95 transition-all"
+              aria-label="Alejar"
+            >
+              <svg className="w-6 h-6 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M5 12h14" />
+              </svg>
+            </button>
+          </div>
+
+          {/* ── LOCATION BUTTON ── below zoom buttons, same style */}
           <button
             onClick={() => {
               if (userLocation) {
@@ -270,11 +323,12 @@ export default function ParkingPage() {
               }
             }}
             disabled={isLocating}
-            className="absolute top-20 right-4 w-14 h-14 bg-white rounded-full shadow-lg flex items-center justify-center active:bg-gray-100 transition-colors disabled:opacity-50 z-[1000]"
+            className="absolute right-4 z-[1000] w-14 h-14 bg-white rounded-full shadow-xl border-2 border-primary/20 flex items-center justify-center active:scale-95 transition-all disabled:opacity-50"
+            style={{ bottom: `${FILTER_BOTTOM + 64}px` }}
             aria-label="Mi ubicacion"
           >
             {isLocating ? (
-              <div className="w-6 h-6 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+              <div className="w-6 h-6 border-[3px] border-primary border-t-transparent rounded-full animate-spin" />
             ) : (
               <svg className="w-7 h-7 text-primary" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0013 3.06V1h-2v2.06A8.994 8.994 0 003.06 11H1v2h2.06A8.994 8.994 0 0011 20.94V23h2v-2.06A8.994 8.994 0 0020.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
@@ -282,136 +336,143 @@ export default function ParkingPage() {
             )}
           </button>
 
-          {/* Filter pills - horizontal scroll */}
-          <div className="absolute bottom-32 left-0 right-0 px-4 z-[1000]">
-            <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
-              {[
-                { key: "recommended" as FilterType, label: "Recomendados", icon: "star" },
-                { key: "nearest" as FilterType, label: "Cercanos", icon: "location" },
-                { key: "cheapest" as FilterType, label: "Economicos", icon: "price" },
-              ].map((filter) => (
+          {/* ── FILTER PILLS ── anchored above bottom card, no gradient */}
+          <div
+            className="absolute left-0 right-0 z-[1000] px-4 pb-3"
+            style={{ bottom: `${FILTER_BOTTOM}px` }}
+          >
+            <div className="flex gap-2.5 overflow-x-auto scrollbar-hide">
+              {(
+                [
+                  { key: "recommended" as FilterType, label: "Recomendados" },
+                  { key: "nearest" as FilterType, label: "Cercanos" },
+                  { key: "cheapest" as FilterType, label: "Economicos" },
+                ] as const
+              ).map((f) => (
                 <button
-                  key={filter.key}
-                  onClick={() => setActiveFilter(filter.key)}
-                  className={`flex-shrink-0 px-5 py-3 rounded-full font-medium text-base shadow-lg transition-all ${
-                    activeFilter === filter.key
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-white text-foreground"
+                  key={f.key}
+                  onClick={() => setActiveFilter(f.key)}
+                  className={`flex-shrink-0 px-5 py-3 rounded-full font-black text-base transition-all ${
+                    activeFilter === f.key
+                      ? "bg-primary text-white"
+                      : "bg-[#111] text-white border border-white/20"
                   }`}
                 >
-                  {filter.label}
+                  {f.label}
                 </button>
               ))}
             </div>
           </div>
+
+          {/* ── SELECTED LOT SHEET — slides up, full info ── */}
+          {showLotSheet && selectedLot && (
+            <div className="absolute inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-[0_-8px_40px_rgba(0,0,0,0.22)] animate-in slide-in-from-bottom z-[1001]">
+              <div className="flex justify-center pt-3 pb-1">
+                <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
+              </div>
+              <div className="px-5 pb-6">
+                {/* Close */}
+                <button
+                  onClick={() => setShowLotSheet(false)}
+                  className="absolute top-3 right-4 w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+                  aria-label="Cerrar"
+                >
+                  <svg className="w-5 h-5 text-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                </button>
+
+                {/* Availability orb + name */}
+                <div className="flex items-center gap-4 mt-2 mb-4">
+                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-white font-black text-2xl flex-shrink-0 shadow-lg ${
+                    selectedLot.availableSlots > 10 ? "bg-success" : selectedLot.availableSlots > 0 ? "bg-warning" : "bg-destructive"
+                  }`}>
+                    {selectedLot.availableSlots}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <h2 className="font-black text-xl text-foreground leading-tight">{selectedLot.name}</h2>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md leading-none ${
+                        selectedLot.facilityType === "large"
+                          ? "bg-primary/10 text-primary"
+                          : "bg-muted text-muted-foreground"
+                      }`}>
+                        {selectedLot.facilityType === "large" ? "CENTRO GRANDE" : "LOCAL"}
+                      </span>
+                    </div>
+                    <p className="text-muted-foreground text-sm truncate">{selectedLot.address}</p>
+                  </div>
+                </div>
+
+                {/* Stats row — big, readable at a glance */}
+                <div className="grid grid-cols-3 gap-2 mb-5">
+                  <div className="bg-muted rounded-2xl p-3 text-center">
+                    <p className="text-xl font-black text-foreground">
+                      {selectedLot.distanceMeters >= 1000
+                        ? `${(selectedLot.distanceMeters / 1000).toFixed(1)}km`
+                        : `${selectedLot.distanceMeters}m`}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Distancia</p>
+                  </div>
+                  <div className="bg-primary/10 rounded-2xl p-3 text-center">
+                    <p className="text-xl font-black text-primary">${selectedLot.pricePerHour.toFixed(2)}</p>
+                    <p className="text-xs text-primary/70 mt-0.5">Por hora</p>
+                  </div>
+                  <div className="bg-muted rounded-2xl p-3 text-center">
+                    <p className="text-xl font-black text-foreground">{selectedLot.rating}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Rating</p>
+                  </div>
+                </div>
+
+                {/* CTA — maximum contrast, full width, tall touch target */}
+                <button
+                  onClick={() => handleViewLotDetails(selectedLot)}
+                  className="w-full py-5 bg-primary text-white rounded-2xl font-black text-lg shadow-xl shadow-primary/30 active:scale-[0.98] transition-transform"
+                >
+                  Ver lugares disponibles
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Bottom action card - quick access to best option */}
+        {/* ── BOTTOM BEST-LOT CARD ── black bg, white text, max contrast */}
         {bestLot && !showLotSheet && (
-          <div className="bg-white border-t border-muted px-4 py-4 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.1)] z-[1000] relative">
-            <div className="flex items-center gap-4">
+          <div className="flex-shrink-0 bg-black px-4 py-4 pb-safe z-[1000]">
+            <div className="flex items-center gap-3">
+              {/* Available count — solid white badge, black text */}
+              <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center font-black text-xl text-black flex-shrink-0">
+                {bestLot.availableSlots}
+              </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Mejor opcion</p>
-                <h3 className="font-bold text-foreground text-lg truncate">{bestLot.name}</h3>
-                <div className="flex items-center gap-3 mt-1 text-sm">
-                  <span className="text-success font-semibold">{bestLot.availableSlots} libres</span>
-                  <span className="text-muted-foreground">{bestLot.distanceMeters}m</span>
-                  <span className="text-primary font-bold">${bestLot.pricePerHour.toFixed(2)}/hr</span>
+                <p className="text-white/50 text-[11px] uppercase tracking-widest leading-none mb-1">Mejor opcion</p>
+                <h3 className="font-black text-base text-white truncate leading-tight">{bestLot.name}</h3>
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  {/* Libres — green solid badge */}
+                  <span className="bg-success text-black text-xs font-black px-2 py-0.5 rounded-md">
+                    {bestLot.availableSlots} libres
+                  </span>
+                  {/* Distance — white */}
+                  <span className="text-white text-xs font-bold">
+                    {bestLot.distanceMeters >= 1000
+                      ? `${(bestLot.distanceMeters / 1000).toFixed(1)} km`
+                      : `${bestLot.distanceMeters} m`}
+                  </span>
+                  {/* Price — white */}
+                  <span className="text-white text-xs font-black">
+                    ${bestLot.pricePerHour.toFixed(2)}/hr
+                  </span>
                 </div>
               </div>
+              {/* CTA arrow — solid orange, black icon */}
               <button
                 onClick={() => handleViewLotDetails(bestLot)}
-                className="w-16 h-16 bg-primary text-primary-foreground rounded-2xl flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+                className="w-14 h-14 bg-secondary rounded-2xl flex items-center justify-center active:scale-95 transition-all flex-shrink-0"
                 aria-label="Ir a estacionamiento"
               >
-                <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                   <path d="M5 12h14M12 5l7 7-7 7" />
                 </svg>
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Selected lot sheet */}
-        {showLotSheet && selectedLot && (
-          <div className="absolute inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.15)] animate-in slide-in-from-bottom pb-safe z-[1001]">
-            {/* Handle */}
-            <div className="flex justify-center py-3">
-              <div className="w-12 h-1.5 bg-muted rounded-full" />
-            </div>
-            
-            {/* Content */}
-            <div className="px-5 pb-5">
-              {/* Close button */}
-              <button
-                onClick={() => setShowLotSheet(false)}
-                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-muted flex items-center justify-center"
-                aria-label="Cerrar"
-              >
-                <svg className="w-5 h-5 text-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M18 6L6 18M6 6l12 12" />
-                </svg>
-              </button>
-
-              {/* Lot info */}
-              <div className="flex items-start gap-4 mb-5">
-                <div
-                  className={`w-16 h-16 rounded-2xl flex items-center justify-center text-white font-bold text-xl flex-shrink-0 ${
-                    selectedLot.availableSlots > 10 ? "bg-success" : selectedLot.availableSlots > 0 ? "bg-warning" : "bg-destructive"
-                  }`}
-                >
-                  {selectedLot.availableSlots}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className="font-bold text-xl text-foreground leading-tight">{selectedLot.name}</h2>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded leading-none ${
-                      selectedLot.facilityType === "large"
-                        ? "bg-blue-50 text-blue-700 border border-blue-100"
-                        : "bg-muted text-muted-foreground"
-                    }`}>
-                      {selectedLot.facilityType === "large" ? "CENTRO GRANDE" : "LOCAL"}
-                    </span>
-                  </div>
-                  <p className="text-muted-foreground text-sm mt-1">{selectedLot.address}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Capacidad total:{" "}
-                    <span className="font-medium text-foreground">
-                      {selectedLot.totalCapacity >= 1000
-                        ? `${(selectedLot.totalCapacity / 1000).toFixed(1)}k`
-                        : selectedLot.totalCapacity}{" "}
-                      vehículos
-                    </span>
-                  </p>
-                </div>
-              </div>
-
-              {/* Quick stats */}
-              <div className="grid grid-cols-3 gap-3 mb-5">
-                <div className="bg-muted/50 rounded-xl p-3 text-center">
-                  <p className="text-2xl font-bold text-foreground">
-                    {selectedLot.distanceMeters >= 1000
-                      ? `${(selectedLot.distanceMeters / 1000).toFixed(1)}km`
-                      : `${selectedLot.distanceMeters}m`}
-                  </p>
-                  <p className="text-xs text-muted-foreground">Distancia</p>
-                </div>
-                <div className="bg-muted/50 rounded-xl p-3 text-center">
-                  <p className="text-2xl font-bold text-primary">${selectedLot.pricePerHour.toFixed(2)}</p>
-                  <p className="text-xs text-muted-foreground">Por hora</p>
-                </div>
-                <div className="bg-muted/50 rounded-xl p-3 text-center">
-                  <p className="text-2xl font-bold text-foreground">{selectedLot.rating}</p>
-                  <p className="text-xs text-muted-foreground">Rating</p>
-                </div>
-              </div>
-
-              {/* Action button */}
-              <button
-                onClick={() => handleViewLotDetails(selectedLot)}
-                className="w-full py-4 bg-primary text-primary-foreground rounded-2xl font-bold text-lg active:scale-[0.98] transition-transform"
-              >
-                Ver lugares disponibles
               </button>
             </div>
           </div>
