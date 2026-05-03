@@ -159,7 +159,8 @@ export default function ParkingPage() {
         new CustomEvent("center-map", { detail: bestLot.coordinates })
       );
     }
-  }, [activeFilter, bestLot, viewMode]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeFilter]);
 
   // ==========================================
   // MOBILE: Slots View
