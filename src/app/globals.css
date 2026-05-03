@@ -83,3 +83,22 @@ body {
 .slide-in-from-bottom {
   animation-name: slide-in-from-bottom;
 }
+
+/* Leaflet map z-index containment */
+.leaflet-container {
+  z-index: 0 !important;
+}
+
+.leaflet-pane {
+  z-index: 400 !important;
+}
+
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 800 !important;
+}
+
+/* Ensure our UI stays above the map */
+.leaflet-control-container {
+  z-index: 800 !important;
+}

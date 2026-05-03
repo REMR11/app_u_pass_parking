@@ -221,7 +221,7 @@ export default function ParkingPage() {
           />
 
           {/* Top bar - minimal info */}
-          <div className="absolute top-4 left-4 right-4 flex items-center gap-3">
+          <div className="absolute top-4 left-4 right-4 flex items-center gap-3 z-[1000]">
             {/* Logo pill */}
             <div className="bg-primary text-primary-foreground px-4 py-2 rounded-full flex items-center gap-2 shadow-lg">
               <span className="font-bold text-lg">U</span>
@@ -244,7 +244,7 @@ export default function ParkingPage() {
               }
             }}
             disabled={isLocating}
-            className="absolute top-20 right-4 w-14 h-14 bg-white rounded-full shadow-lg flex items-center justify-center active:bg-gray-100 transition-colors disabled:opacity-50"
+            className="absolute top-20 right-4 w-14 h-14 bg-white rounded-full shadow-lg flex items-center justify-center active:bg-gray-100 transition-colors disabled:opacity-50 z-[1000]"
             aria-label="Mi ubicacion"
           >
             {isLocating ? (
@@ -257,7 +257,7 @@ export default function ParkingPage() {
           </button>
 
           {/* Filter pills - horizontal scroll */}
-          <div className="absolute bottom-32 left-0 right-0 px-4">
+          <div className="absolute bottom-32 left-0 right-0 px-4 z-[1000]">
             <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
               {[
                 { key: "recommended" as FilterType, label: "Recomendados", icon: "star" },
@@ -282,7 +282,7 @@ export default function ParkingPage() {
 
         {/* Bottom action card - quick access to best option */}
         {bestLot && !showLotSheet && (
-          <div className="bg-white border-t border-muted px-4 py-4 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
+          <div className="bg-white border-t border-muted px-4 py-4 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.1)] z-[1000] relative">
             <div className="flex items-center gap-4">
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Mejor opcion</p>
@@ -308,7 +308,7 @@ export default function ParkingPage() {
 
         {/* Selected lot sheet */}
         {showLotSheet && selectedLot && (
-          <div className="absolute inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.15)] animate-in slide-in-from-bottom pb-safe">
+          <div className="absolute inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.15)] animate-in slide-in-from-bottom pb-safe z-[1001]">
             {/* Handle */}
             <div className="flex justify-center py-3">
               <div className="w-12 h-1.5 bg-muted rounded-full" />
