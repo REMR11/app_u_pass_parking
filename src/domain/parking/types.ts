@@ -21,11 +21,17 @@ export type ParkingLevel = {
   slots: ParkingSlot[];
 };
 
+export type Coordinates = {
+  lat: number;
+  lng: number;
+};
+
 export type ParkingLot = {
   id: ParkingLotId;
   buildingId: BuildingId;
   name: string;
   address: string;
+  coordinates: Coordinates;
   distanceMeters: number;
   pricePerHour: number;
   currency: string;

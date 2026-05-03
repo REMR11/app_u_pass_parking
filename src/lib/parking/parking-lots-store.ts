@@ -37,12 +37,16 @@ function generateLevels(lotId: string, count: number): ParkingLevel[] {
   });
 }
 
+// Default center: Mexico City (Reforma area)
+export const DEFAULT_CENTER = { lat: 19.4326, lng: -99.1332 };
+
 const parkingLots: ParkingLot[] = [
   {
     id: "lot-001",
     buildingId: "bld-001",
     name: "Torre Norte - Principal",
     address: "Av. Principal 100, Nivel -1",
+    coordinates: { lat: 19.4340, lng: -99.1350 },
     distanceMeters: 120,
     pricePerHour: 25,
     currency: "MXN",
@@ -56,6 +60,7 @@ const parkingLots: ParkingLot[] = [
     buildingId: "bld-001",
     name: "Torre Norte - Visitantes",
     address: "Av. Principal 100, Nivel -2",
+    coordinates: { lat: 19.4335, lng: -99.1345 },
     distanceMeters: 180,
     pricePerHour: 20,
     currency: "MXN",
@@ -69,6 +74,7 @@ const parkingLots: ParkingLot[] = [
     buildingId: "bld-002",
     name: "Edificio Central",
     address: "Calle Secundaria 45",
+    coordinates: { lat: 19.4310, lng: -99.1380 },
     distanceMeters: 350,
     pricePerHour: 15,
     currency: "MXN",
@@ -82,6 +88,7 @@ const parkingLots: ParkingLot[] = [
     buildingId: "bld-003",
     name: "Plaza Comercial Sur",
     address: "Blvd. Sur 200",
+    coordinates: { lat: 19.4280, lng: -99.1300 },
     distanceMeters: 500,
     pricePerHour: 12,
     currency: "MXN",
