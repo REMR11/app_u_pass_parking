@@ -147,6 +147,20 @@ export default function ParkingPage() {
   // Count available
   const availableCount = filteredLots.filter((l) => l.availableSlots > 0).length;
 
+  // Center map on best lot when filter changes
+  useEffect(() => {
+    if (bestLot && viewMode === "map") {
+      // Select the best lot and center map on it
+      setSelectedLot(bestLot);
+      setShowLotSheet(false); // Don't show sheet automatically, just highlight
+      
+      // Dispatch event to center map on best lot
+      window.dispatchEvent(
+        new CustomEvent("center-map", { detail: bestLot.coordinates })
+      );
+    }
+  }, [activeFilter]); // Only trigger when filter changes
+
   // ==========================================
   // MOBILE: Slots View
   // ==========================================
