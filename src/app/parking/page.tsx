@@ -540,13 +540,12 @@ export default function ParkingPage() {
 
         {/* Parking list */}
         <div className="flex-1 overflow-y-auto px-3 pb-4 space-y-2 scrollbar-hide">
-          {filteredLots.map((lot, index) => (
+          {filteredLots.map((lot) => (
             <ParkingListCard
               key={lot.id}
               lot={lot}
               isSelected={selectedLot?.id === lot.id}
               onSelect={handleSelectLot}
-              rank={index + 1}
             />
           ))}
 
