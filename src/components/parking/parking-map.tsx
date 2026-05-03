@@ -146,8 +146,17 @@ export function ParkingMap({
 
     return () => {
       if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
+        // Stop any in-progress animations before removing to avoid
+        // the "_leaflet_pos" error on unmount during zoom transitions
+        try {
+          mapInstanceRef.current.stop();
+          mapInstanceRef.current.remove();
+        } catch (_) {
+          // Silently ignore errors during cleanup
+        }
         mapInstanceRef.current = null;
+        markersRef.current.clear();
+        userMarkerRef.current = null;
       }
     };
   }, [center.lat, center.lng, onMapReady]);
@@ -304,10 +313,14 @@ export function ParkingMap({
     }
   }, [selectedLotId, lots, isLoaded]);
 
-  // Expose zoom controls to parent via an imperative ref pattern using window events
+  // Expose zoom controls to parent via window events
   useEffect(() => {
-    const handleZoomIn = () => { if (mapInstanceRef.current) mapInstanceRef.current.zoomIn(); };
-    const handleZoomOut = () => { if (mapInstanceRef.current) mapInstanceRef.current.zoomOut(); };
+    const handleZoomIn = () => {
+      try { if (mapInstanceRef.current) mapInstanceRef.current.zoomIn(); } catch (_) {}
+    };
+    const handleZoomOut = () => {
+      try { if (mapInstanceRef.current) mapInstanceRef.current.zoomOut(); } catch (_) {}
+    };
     window.addEventListener("map-zoom-in", handleZoomIn);
     window.addEventListener("map-zoom-out", handleZoomOut);
     return () => {

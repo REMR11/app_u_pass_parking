@@ -256,9 +256,8 @@ export default function ParkingPage() {
   // MOBILE: Map View (Driver-First Design)
   // ==========================================
   if (isMobile) {
-    // Height of the bottom card so filters sit right above it
-    const BOTTOM_CARD_H = 96; // px approximate
-    const FILTER_BOTTOM = BOTTOM_CARD_H + 12;
+    // Offset for floating buttons above the filter strip
+    const BUTTONS_BOTTOM = 72; // height of filter strip + safe margin
 
     return (
       <div className="h-dvh flex flex-col bg-background overflow-hidden">
@@ -293,7 +292,7 @@ export default function ParkingPage() {
           {/* ── ZOOM BUTTONS ── above location button, same round white/blue style */}
           <div
             className="absolute right-4 z-[1000] flex flex-col gap-2"
-            style={{ bottom: `${FILTER_BOTTOM + 64 + 56 + 12}px` }}
+            style={{ bottom: `${BUTTONS_BOTTOM + 56 + 12}px` }}
           >
             <button
               onClick={() => window.dispatchEvent(new Event("map-zoom-in"))}
@@ -324,7 +323,7 @@ export default function ParkingPage() {
             }}
             disabled={isLocating}
             className="absolute right-4 z-[1000] w-14 h-14 bg-white rounded-full shadow-xl border-2 border-primary/20 flex items-center justify-center active:scale-95 transition-all disabled:opacity-50"
-            style={{ bottom: `${FILTER_BOTTOM + 64}px` }}
+            style={{ bottom: `${BUTTONS_BOTTOM}px` }}
             aria-label="Mi ubicacion"
           >
             {isLocating ? (
@@ -336,147 +335,131 @@ export default function ParkingPage() {
             )}
           </button>
 
-          {/* ── FILTER PILLS ── anchored above bottom card, no gradient */}
-          <div
-            className="absolute left-0 right-0 z-[1000] px-4 pb-3"
-            style={{ bottom: `${FILTER_BOTTOM}px` }}
-          >
-            <div className="flex gap-2.5 overflow-x-auto scrollbar-hide">
-              {(
-                [
-                  { key: "recommended" as FilterType, label: "Recomendados" },
-                  { key: "nearest" as FilterType, label: "Cercanos" },
-                  { key: "cheapest" as FilterType, label: "Economicos" },
-                ] as const
-              ).map((f) => (
-                <button
-                  key={f.key}
-                  onClick={() => setActiveFilter(f.key)}
-                  className={`flex-shrink-0 px-5 py-3 rounded-full font-black text-base transition-all ${
-                    activeFilter === f.key
-                      ? "bg-primary text-white"
-                      : "bg-[#111] text-white border border-white/20"
-                  }`}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-          </div>
+        </div>
 
-          {/* ── SELECTED LOT SHEET — slides up, full info ── */}
-          {showLotSheet && selectedLot && (
-            <div className="absolute inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-[0_-8px_40px_rgba(0,0,0,0.22)] animate-in slide-in-from-bottom z-[1001]">
-              <div className="flex justify-center pt-3 pb-1">
-                <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
-              </div>
-              <div className="px-5 pb-6">
-                {/* Close */}
+        {/* ── FILTER PILLS ── transparent container, compact solid buttons */}
+        <div className="flex-shrink-0 px-3 py-2 z-[1000]">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+            {(
+              [
+                { key: "recommended" as FilterType, label: "Recomendados" },
+                { key: "nearest" as FilterType, label: "Cercanos" },
+                { key: "cheapest" as FilterType, label: "Economicos" },
+              ] as const
+            ).map((f) => (
+              <button
+                key={f.key}
+                onClick={() => setActiveFilter(f.key)}
+                className={`flex-shrink-0 px-4 py-2 rounded-full font-bold text-sm transition-all ${
+                  activeFilter === f.key
+                    ? "bg-primary text-white shadow-md shadow-primary/40"
+                    : "bg-[#111111] text-white shadow-sm shadow-black/60"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ── UNIFIED BOTTOM CARD ── white bg, consistent layout for both states */}
+        {(showLotSheet && selectedLot) || (bestLot && !showLotSheet) ? (
+          <div
+            className={`flex-shrink-0 bg-white z-[1001] transition-all ${
+              showLotSheet ? "rounded-t-3xl shadow-[0_-8px_40px_rgba(0,0,0,0.22)]" : "shadow-[0_-4px_24px_rgba(0,0,0,0.12)]"
+            }`}
+            style={{ paddingBottom: "max(20px, env(safe-area-inset-bottom))" }}
+          >
+            {/* Drag handle + close for selected state */}
+            {showLotSheet && selectedLot && (
+              <>
+                <div className="flex justify-center pt-3 pb-1">
+                  <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
+                </div>
                 <button
                   onClick={() => setShowLotSheet(false)}
-                  className="absolute top-3 right-4 w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+                  className="absolute top-3 right-4 w-9 h-9 rounded-full bg-foreground/10 flex items-center justify-center z-10"
                   aria-label="Cerrar"
                 >
                   <svg className="w-5 h-5 text-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <path d="M18 6L6 18M6 6l12 12" />
                   </svg>
                 </button>
+              </>
+            )}
 
-                {/* Availability orb + name */}
-                <div className="flex items-center gap-4 mt-2 mb-4">
-                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-white font-black text-2xl flex-shrink-0 shadow-lg ${
-                    selectedLot.availableSlots > 10 ? "bg-success" : selectedLot.availableSlots > 0 ? "bg-warning" : "bg-destructive"
-                  }`}>
-                    {selectedLot.availableSlots}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <h2 className="font-black text-xl text-foreground leading-tight">{selectedLot.name}</h2>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md leading-none ${
-                        selectedLot.facilityType === "large"
-                          ? "bg-primary/10 text-primary"
-                          : "bg-muted text-muted-foreground"
-                      }`}>
-                        {selectedLot.facilityType === "large" ? "CENTRO GRANDE" : "LOCAL"}
-                      </span>
-                    </div>
-                    <p className="text-muted-foreground text-sm truncate">{selectedLot.address}</p>
-                  </div>
+            <div className="px-5 pt-4 pb-5">
+              {/* Header row: availability badge + name + type */}
+              <div className="flex items-center gap-4 mb-4">
+                {/* Availability badge — primary blue, always */}
+                <div className="w-14 h-14 rounded-2xl bg-primary flex flex-col items-center justify-center flex-shrink-0 shadow-md">
+                  <span className="font-black text-xl text-white leading-none">
+                    {showLotSheet && selectedLot ? selectedLot.availableSlots : bestLot?.availableSlots}
+                  </span>
+                  <span className="text-[9px] font-bold text-white/70 uppercase tracking-tight mt-0.5">libres</span>
                 </div>
 
-                {/* Stats row — big, readable at a glance */}
-                <div className="grid grid-cols-3 gap-2 mb-5">
-                  <div className="bg-muted rounded-2xl p-3 text-center">
-                    <p className="text-xl font-black text-foreground">
-                      {selectedLot.distanceMeters >= 1000
-                        ? `${(selectedLot.distanceMeters / 1000).toFixed(1)}km`
-                        : `${selectedLot.distanceMeters}m`}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">Distancia</p>
+                {/* Name + address */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="font-black text-lg text-foreground leading-tight truncate">
+                      {showLotSheet && selectedLot ? selectedLot.name : bestLot?.name}
+                    </h2>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded leading-none ${
+                      (showLotSheet ? selectedLot?.facilityType : bestLot?.facilityType) === "large"
+                        ? "bg-primary/10 text-primary"
+                        : "bg-muted text-muted-foreground"
+                    }`}>
+                      {(showLotSheet ? selectedLot?.facilityType : bestLot?.facilityType) === "large" ? "GRANDE" : "LOCAL"}
+                    </span>
                   </div>
-                  <div className="bg-primary/10 rounded-2xl p-3 text-center">
-                    <p className="text-xl font-black text-primary">${selectedLot.pricePerHour.toFixed(2)}</p>
-                    <p className="text-xs text-primary/70 mt-0.5">Por hora</p>
-                  </div>
-                  <div className="bg-muted rounded-2xl p-3 text-center">
-                    <p className="text-xl font-black text-foreground">{selectedLot.rating}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">Rating</p>
-                  </div>
-                </div>
-
-                {/* CTA — maximum contrast, full width, tall touch target */}
-                <button
-                  onClick={() => handleViewLotDetails(selectedLot)}
-                  className="w-full py-5 bg-primary text-white rounded-2xl font-black text-lg shadow-xl shadow-primary/30 active:scale-[0.98] transition-transform"
-                >
-                  Ver lugares disponibles
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ── BOTTOM BEST-LOT CARD ── black bg, white text, max contrast */}
-        {bestLot && !showLotSheet && (
-          <div className="flex-shrink-0 bg-black px-4 py-4 pb-safe z-[1000]">
-            <div className="flex items-center gap-3">
-              {/* Available count — solid white badge, black text */}
-              <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center font-black text-xl text-black flex-shrink-0">
-                {bestLot.availableSlots}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-white/50 text-[11px] uppercase tracking-widest leading-none mb-1">Mejor opcion</p>
-                <h3 className="font-black text-base text-white truncate leading-tight">{bestLot.name}</h3>
-                <div className="flex items-center gap-2 mt-1 flex-wrap">
-                  {/* Libres — green solid badge */}
-                  <span className="bg-success text-black text-xs font-black px-2 py-0.5 rounded-md">
-                    {bestLot.availableSlots} libres
-                  </span>
-                  {/* Distance — white */}
-                  <span className="text-white text-xs font-bold">
-                    {bestLot.distanceMeters >= 1000
-                      ? `${(bestLot.distanceMeters / 1000).toFixed(1)} km`
-                      : `${bestLot.distanceMeters} m`}
-                  </span>
-                  {/* Price — white */}
-                  <span className="text-white text-xs font-black">
-                    ${bestLot.pricePerHour.toFixed(2)}/hr
-                  </span>
+                  <p className="text-muted-foreground text-sm truncate mt-0.5">
+                    {showLotSheet && selectedLot ? selectedLot.address : bestLot?.address}
+                  </p>
                 </div>
               </div>
-              {/* CTA arrow — solid orange, black icon */}
+
+              {/* Stats row — 3 columns, consistent */}
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                <div className="bg-muted rounded-xl p-2.5 text-center">
+                  <p className="text-lg font-black text-foreground leading-tight">
+                    {(() => {
+                      const lot = showLotSheet ? selectedLot : bestLot;
+                      if (!lot) return "-";
+                      return lot.distanceMeters >= 1000
+                        ? `${(lot.distanceMeters / 1000).toFixed(1)}km`
+                        : `${lot.distanceMeters}m`;
+                    })()}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">Distancia</p>
+                </div>
+                <div className="bg-success/10 rounded-xl p-2.5 text-center">
+                  <p className="text-lg font-black text-success leading-tight">
+                    ${(showLotSheet ? selectedLot?.pricePerHour : bestLot?.pricePerHour)?.toFixed(2) || "-"}
+                  </p>
+                  <p className="text-[10px] text-success/70 font-medium uppercase tracking-wide">Por hora</p>
+                </div>
+                <div className="bg-muted rounded-xl p-2.5 text-center">
+                  <p className="text-lg font-black text-foreground leading-tight">
+                    {(showLotSheet ? selectedLot?.rating : bestLot?.rating) || "-"}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">Rating</p>
+                </div>
+              </div>
+
+              {/* CTA button — full width, high contrast green */}
               <button
-                onClick={() => handleViewLotDetails(bestLot)}
-                className="w-14 h-14 bg-secondary rounded-2xl flex items-center justify-center active:scale-95 transition-all flex-shrink-0"
-                aria-label="Ir a estacionamiento"
+                onClick={() => {
+                  const lot = showLotSheet ? selectedLot : bestLot;
+                  if (lot) handleViewLotDetails(lot);
+                }}
+                className="w-full py-4 bg-success text-white rounded-2xl font-black text-base active:scale-[0.98] transition-transform shadow-lg shadow-success/30"
               >
-                <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
+                Ver lugares disponibles
               </button>
             </div>
           </div>
-        )}
+        ) : null}
       </div>
     );
   }
