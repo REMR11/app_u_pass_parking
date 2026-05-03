@@ -257,7 +257,7 @@ export default function ParkingPage() {
   // ==========================================
   if (isMobile) {
     // Height of the bottom card so filters sit right above it
-    const BOTTOM_CARD_H = 96; // px approximate
+    const BOTTOM_CARD_H = 136; // px — taller card for driver usability
     const FILTER_BOTTOM = BOTTOM_CARD_H + 12;
 
     return (
@@ -436,41 +436,40 @@ export default function ParkingPage() {
           )}
         </div>
 
-        {/* ── BOTTOM BEST-LOT CARD ── black bg, white text, max contrast */}
+        {/* ── BOTTOM BEST-LOT CARD ── tall, high contrast, driver-friendly */}
         {bestLot && !showLotSheet && (
-          <div className="flex-shrink-0 bg-black px-4 py-4 pb-safe z-[1000]">
-            <div className="flex items-center gap-3">
-              {/* Available count — solid white badge, black text */}
-              <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center font-black text-xl text-black flex-shrink-0">
-                {bestLot.availableSlots}
+          <div className="flex-shrink-0 bg-black px-5 pt-5 pb-safe z-[1000]" style={{ paddingBottom: "max(20px, env(safe-area-inset-bottom))" }}>
+            {/* Label row */}
+            <p className="text-white/50 text-xs uppercase tracking-widest leading-none mb-3">Mejor opcion</p>
+            <div className="flex items-center gap-4">
+              {/* Available count — large white square badge */}
+              <div className="w-16 h-16 rounded-2xl bg-white flex flex-col items-center justify-center flex-shrink-0">
+                <span className="font-black text-2xl text-black leading-none">{bestLot.availableSlots}</span>
+                <span className="text-[10px] font-bold text-black/50 uppercase tracking-tight mt-0.5">libres</span>
               </div>
+
+              {/* Name + stats */}
               <div className="flex-1 min-w-0">
-                <p className="text-white/50 text-[11px] uppercase tracking-widest leading-none mb-1">Mejor opcion</p>
-                <h3 className="font-black text-base text-white truncate leading-tight">{bestLot.name}</h3>
-                <div className="flex items-center gap-2 mt-1 flex-wrap">
-                  {/* Libres — green solid badge */}
-                  <span className="bg-success text-black text-xs font-black px-2 py-0.5 rounded-md">
-                    {bestLot.availableSlots} libres
-                  </span>
-                  {/* Distance — white */}
-                  <span className="text-white text-xs font-bold">
+                <h3 className="font-black text-xl text-white truncate leading-tight">{bestLot.name}</h3>
+                <div className="flex items-center gap-3 mt-2">
+                  <span className="bg-success text-black text-sm font-black px-3 py-1 rounded-lg">
                     {bestLot.distanceMeters >= 1000
                       ? `${(bestLot.distanceMeters / 1000).toFixed(1)} km`
                       : `${bestLot.distanceMeters} m`}
                   </span>
-                  {/* Price — white */}
-                  <span className="text-white text-xs font-black">
-                    ${bestLot.pricePerHour.toFixed(2)}/hr
+                  <span className="text-white text-lg font-black">
+                    ${bestLot.pricePerHour.toFixed(2)}<span className="text-white/60 text-sm font-bold">/hr</span>
                   </span>
                 </div>
               </div>
-              {/* CTA arrow — solid orange, black icon */}
+
+              {/* CTA arrow — solid primary blue, large */}
               <button
                 onClick={() => handleViewLotDetails(bestLot)}
-                className="w-14 h-14 bg-secondary rounded-2xl flex items-center justify-center active:scale-95 transition-all flex-shrink-0"
+                className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center active:scale-95 transition-all flex-shrink-0 shadow-lg shadow-primary/40"
                 aria-label="Ir a estacionamiento"
               >
-                <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                   <path d="M5 12h14M12 5l7 7-7 7" />
                 </svg>
               </button>
