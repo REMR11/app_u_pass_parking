@@ -313,10 +313,13 @@ export default function ParkingPage() {
 
           {/* ── FILTER PILLS ── anchored above bottom card */}
           <div
-            className="absolute left-0 right-0 px-4 z-[1000]"
-            style={{ bottom: `${FILTER_BOTTOM}px` }}
+            className="absolute left-0 right-0 z-[1000] px-4 py-3"
+            style={{
+              bottom: `${FILTER_BOTTOM}px`,
+              background: "linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%)",
+            }}
           >
-            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+            <div className="flex gap-2.5 overflow-x-auto scrollbar-hide pb-0.5">
               {(
                 [
                   { key: "recommended" as FilterType, label: "Recomendados" },
@@ -327,10 +330,10 @@ export default function ParkingPage() {
                 <button
                   key={f.key}
                   onClick={() => setActiveFilter(f.key)}
-                  className={`flex-shrink-0 px-5 py-3 rounded-full font-bold text-sm shadow-xl transition-all border-2 ${
+                  className={`flex-shrink-0 px-5 py-3 rounded-full font-black text-base transition-all ${
                     activeFilter === f.key
-                      ? "bg-primary text-white border-primary shadow-primary/40"
-                      : "bg-white text-foreground border-white shadow-black/20"
+                      ? "bg-primary text-white shadow-lg shadow-primary/50 scale-105"
+                      : "bg-black/70 text-white border border-white/25"
                   }`}
                 >
                   {f.label}
