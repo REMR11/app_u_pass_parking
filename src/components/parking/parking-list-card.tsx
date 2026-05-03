@@ -11,7 +11,8 @@ type ParkingListCardProps = {
 
 export function ParkingListCard({ lot, isSelected, onSelect, rank }: ParkingListCardProps) {
   const availabilityPercent = (lot.availableSlots / lot.totalSlots) * 100;
-  
+  const isLarge = lot.facilityType === "large";
+
   // Get initials from lot name
   const getInitials = (name: string) => {
     const words = name.split(/[\s-]+/);
@@ -26,6 +27,13 @@ export function ParkingListCard({ lot, isSelected, onSelect, rank }: ParkingList
     if (availabilityPercent >= 50) return "bg-green-600";
     if (availabilityPercent >= 20) return "bg-amber-500";
     return "bg-red-500";
+  };
+
+  // Format capacity label for display
+  const getCapacityLabel = () => {
+    const cap = lot.totalCapacity;
+    if (cap >= 1000) return `${(cap / 1000).toFixed(1)}k espacios`;
+    return `${cap} espacios`;
   };
 
   // Determine if lot is available
@@ -52,9 +60,21 @@ export function ParkingListCard({ lot, isSelected, onSelect, rank }: ParkingList
         <div className="flex-1 min-w-0">
           {/* Header row */}
           <div className="flex items-start justify-between gap-2 mb-1">
-            <h3 className="font-semibold text-foreground truncate text-sm">
-              {lot.name}
-            </h3>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <h3 className="font-semibold text-foreground truncate text-sm">
+                {lot.name}
+              </h3>
+              {/* Facility type indicator */}
+              {isLarge ? (
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-700 bg-blue-50 border border-blue-100 px-1.5 py-0.5 rounded flex-shrink-0 leading-none">
+                  GRANDE
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded flex-shrink-0 leading-none">
+                  LOCAL
+                </span>
+              )}
+            </div>
             {isAvailable ? (
               <span className="inline-flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full flex-shrink-0">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
@@ -91,7 +111,9 @@ export function ParkingListCard({ lot, isSelected, onSelect, rank }: ParkingList
           {/* Tags */}
           <div className="flex flex-wrap gap-1 mt-2">
             <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-              {lot.distanceMeters}m
+              {lot.distanceMeters >= 1000
+                ? `${(lot.distanceMeters / 1000).toFixed(1)} km`
+                : `${lot.distanceMeters} m`}
             </span>
             <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
               {lot.availableSlots}/{lot.totalSlots} lugares
@@ -101,6 +123,16 @@ export function ParkingListCard({ lot, isSelected, onSelect, rank }: ParkingList
                 {lot.levels.length} niveles
               </span>
             )}
+            {/* Capacity context tag */}
+            <span
+              className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                isLarge
+                  ? "bg-blue-50 text-blue-700"
+                  : "bg-slate-100 text-slate-500"
+              }`}
+            >
+              {getCapacityLabel()}
+            </span>
           </div>
         </div>
       </div>

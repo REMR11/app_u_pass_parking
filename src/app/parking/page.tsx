@@ -354,22 +354,44 @@ export default function ParkingPage() {
               {/* Lot info */}
               <div className="flex items-start gap-4 mb-5">
                 <div
-                  className={`w-16 h-16 rounded-2xl flex items-center justify-center text-white font-bold text-xl ${
+                  className={`w-16 h-16 rounded-2xl flex items-center justify-center text-white font-bold text-xl flex-shrink-0 ${
                     selectedLot.availableSlots > 10 ? "bg-success" : selectedLot.availableSlots > 0 ? "bg-warning" : "bg-destructive"
                   }`}
                 >
                   {selectedLot.availableSlots}
                 </div>
-                <div className="flex-1">
-                  <h2 className="font-bold text-xl text-foreground">{selectedLot.name}</h2>
-                  <p className="text-muted-foreground mt-1">{selectedLot.address}</p>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="font-bold text-xl text-foreground leading-tight">{selectedLot.name}</h2>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded leading-none ${
+                      selectedLot.facilityType === "large"
+                        ? "bg-blue-50 text-blue-700 border border-blue-100"
+                        : "bg-muted text-muted-foreground"
+                    }`}>
+                      {selectedLot.facilityType === "large" ? "CENTRO GRANDE" : "LOCAL"}
+                    </span>
+                  </div>
+                  <p className="text-muted-foreground text-sm mt-1">{selectedLot.address}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Capacidad total:{" "}
+                    <span className="font-medium text-foreground">
+                      {selectedLot.totalCapacity >= 1000
+                        ? `${(selectedLot.totalCapacity / 1000).toFixed(1)}k`
+                        : selectedLot.totalCapacity}{" "}
+                      vehículos
+                    </span>
+                  </p>
                 </div>
               </div>
 
               {/* Quick stats */}
               <div className="grid grid-cols-3 gap-3 mb-5">
                 <div className="bg-muted/50 rounded-xl p-3 text-center">
-                  <p className="text-2xl font-bold text-foreground">{selectedLot.distanceMeters}m</p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {selectedLot.distanceMeters >= 1000
+                      ? `${(selectedLot.distanceMeters / 1000).toFixed(1)}km`
+                      : `${selectedLot.distanceMeters}m`}
+                  </p>
                   <p className="text-xs text-muted-foreground">Distancia</p>
                 </div>
                 <div className="bg-muted/50 rounded-xl p-3 text-center">

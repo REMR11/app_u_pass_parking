@@ -26,6 +26,14 @@ export type Coordinates = {
   lng: number;
 };
 
+/**
+ * "large"  – centros comerciales mayores (Metrocentro, Multiplaza, etc.)
+ *            Capacidad real: 1,500–3,000 vehículos, estructura multinivel.
+ * "regional" – centros regionales/locales (Encuentros, Bambú, edificios)
+ *            Capacidad real: 100–300 vehículos.
+ */
+export type FacilityType = "large" | "regional";
+
 export type ParkingLot = {
   id: ParkingLotId;
   buildingId: BuildingId;
@@ -36,6 +44,10 @@ export type ParkingLot = {
   pricePerHour: number;
   currency: string;
   levels: ParkingLevel[];
+  /** Capacidad total real de la instalacion (aforo fisico). */
+  totalCapacity: number;
+  /** Tipo de instalacion que determina escala y contexto. */
+  facilityType: FacilityType;
   totalSlots: number;
   availableSlots: number;
   rating: number;

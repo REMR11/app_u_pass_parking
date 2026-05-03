@@ -73,15 +73,27 @@ export function ParkingMap({
             background: transparent;
             border: none;
           }
+          /* Large facility: bigger pill with capacity badge */
+          .price-marker-large .price-marker-content {
+            padding: 7px 14px;
+            border-radius: 22px;
+            font-size: 14px;
+            font-weight: 700;
+          }
+          /* Regional facility: smaller, lighter pill */
+          .price-marker-regional .price-marker-content {
+            padding: 5px 10px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+            opacity: 0.92;
+          }
           .price-marker-content {
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 13px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            gap: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.18);
             cursor: pointer;
             transition: all 0.2s ease;
             white-space: nowrap;
@@ -90,8 +102,15 @@ export function ParkingMap({
             transform: scale(1.1);
           }
           .price-marker-selected .price-marker-content {
-            transform: scale(1.15);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            transform: scale(1.18);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+          }
+          .capacity-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.7);
+            flex-shrink: 0;
           }
           .user-location-marker {
             background: transparent;
@@ -202,15 +221,21 @@ export function ParkingMap({
           }
         }
 
+        const isLarge = lot.facilityType === "large";
+        // Large lots get a bigger pill; regional lots get a compact one
+        const iconW = isLarge ? 86 : 70;
+        const iconH = isLarge ? 34 : 28;
+
         return L.divIcon({
-          className: `price-marker ${isSelected ? "price-marker-selected" : ""}`,
+          className: `price-marker ${isSelected ? "price-marker-selected" : ""} price-marker-${lot.facilityType}`,
           html: `
             <div class="price-marker-content" style="background-color: ${bgColor}; color: ${textColor};">
+              ${isLarge ? '<span class="capacity-dot"></span>' : ""}
               $${lot.pricePerHour.toFixed(2)}
             </div>
           `,
-          iconSize: [70, 30],
-          iconAnchor: [35, 15],
+          iconSize: [iconW, iconH],
+          iconAnchor: [iconW / 2, iconH / 2],
         });
       };
 
