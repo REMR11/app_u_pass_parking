@@ -20,6 +20,7 @@ Abre [http://localhost:3000](http://localhost:3000). Puedes entrar con **Microso
 - [docs/MICROSOFT_ENTRA_ID.md](docs/MICROSOFT_ENTRA_ID.md) — Login con **Microsoft Entra ID** (Azure).
 - [docs/PAYMENTS_PSP.md](docs/PAYMENTS_PSP.md) — Integración de **pagos móviles** (PSP).
 - [docs/TENANT_WHITELABEL.md](docs/TENANT_WHITELABEL.md) — **Marca multi-empresa**.
+- [docs/NOTIFICATIONS.md](docs/NOTIFICATIONS.md) — **Correos** (bienvenida, reset, Resend).
 
 ## Skills de Cursor
 
@@ -27,6 +28,7 @@ Abre [http://localhost:3000](http://localhost:3000). Puedes entrar con **Microso
 - `.cursor/skills/parking-auth-entra/SKILL.md` — Auth y Entra ID.
 - `.cursor/skills/parking-payments-psp/SKILL.md` — Pagos y PSP.
 - `.cursor/skills/parking-tenant-whitelabel/SKILL.md` — Marca y tenant.
+- `.cursor/skills/parking-notifications-email/SKILL.md` — Correos transaccionales.
 
 ## Scripts
 
