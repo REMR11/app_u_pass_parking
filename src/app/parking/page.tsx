@@ -256,9 +256,8 @@ export default function ParkingPage() {
   // MOBILE: Map View (Driver-First Design)
   // ==========================================
   if (isMobile) {
-    // Height of the unified bottom card (with stats row)
-    const BOTTOM_CARD_H = 200; // px — unified card with stats
-    const FILTER_BOTTOM = BOTTOM_CARD_H + 8;
+    // Offset for floating buttons above the filter strip
+    const BUTTONS_BOTTOM = 72; // height of filter strip + safe margin
 
     return (
       <div className="h-dvh flex flex-col bg-background overflow-hidden">
@@ -293,7 +292,7 @@ export default function ParkingPage() {
           {/* ── ZOOM BUTTONS ── above location button, same round white/blue style */}
           <div
             className="absolute right-4 z-[1000] flex flex-col gap-2"
-            style={{ bottom: `${FILTER_BOTTOM + 64 + 56 + 12}px` }}
+            style={{ bottom: `${BUTTONS_BOTTOM + 56 + 12}px` }}
           >
             <button
               onClick={() => window.dispatchEvent(new Event("map-zoom-in"))}
@@ -324,7 +323,7 @@ export default function ParkingPage() {
             }}
             disabled={isLocating}
             className="absolute right-4 z-[1000] w-14 h-14 bg-white rounded-full shadow-xl border-2 border-primary/20 flex items-center justify-center active:scale-95 transition-all disabled:opacity-50"
-            style={{ bottom: `${FILTER_BOTTOM + 64}px` }}
+            style={{ bottom: `${BUTTONS_BOTTOM}px` }}
             aria-label="Mi ubicacion"
           >
             {isLocating ? (
@@ -336,34 +335,31 @@ export default function ParkingPage() {
             )}
           </button>
 
-          {/* ── FILTER PILLS ── anchored above bottom card, no gradient */}
-          <div
-            className="absolute left-0 right-0 z-[1000] px-4 pb-3"
-            style={{ bottom: `${FILTER_BOTTOM}px` }}
-          >
-            <div className="flex gap-2.5 overflow-x-auto scrollbar-hide">
-              {(
-                [
-                  { key: "recommended" as FilterType, label: "Recomendados" },
-                  { key: "nearest" as FilterType, label: "Cercanos" },
-                  { key: "cheapest" as FilterType, label: "Economicos" },
-                ] as const
-              ).map((f) => (
-                <button
-                  key={f.key}
-                  onClick={() => setActiveFilter(f.key)}
-                  className={`flex-shrink-0 px-5 py-3 rounded-full font-black text-base transition-all ${
-                    activeFilter === f.key
-                      ? "bg-primary text-white"
-                      : "bg-[#111] text-white border border-white/20"
-                  }`}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-          </div>
+        </div>
 
+        {/* ── FILTER PILLS ── in flex flow, always above card */}
+        <div className="flex-shrink-0 bg-foreground px-4 py-3 z-[1000]">
+          <div className="flex gap-2.5 overflow-x-auto scrollbar-hide">
+            {(
+              [
+                { key: "recommended" as FilterType, label: "Recomendados" },
+                { key: "nearest" as FilterType, label: "Cercanos" },
+                { key: "cheapest" as FilterType, label: "Economicos" },
+              ] as const
+            ).map((f) => (
+              <button
+                key={f.key}
+                onClick={() => setActiveFilter(f.key)}
+                className={`flex-shrink-0 px-5 py-3 rounded-full font-black text-base transition-all ${
+                  activeFilter === f.key
+                    ? "bg-primary text-white"
+                    : "bg-white/10 text-white border border-white/20"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* ── UNIFIED BOTTOM CARD ── white bg, consistent layout for both states */}
