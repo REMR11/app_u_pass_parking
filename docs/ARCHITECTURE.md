@@ -15,18 +15,19 @@ Base **mantenible** para gestión de acceso a estacionamiento en **varios edific
 
 ## Autenticación
 
-- **NextAuth v5** con proveedor **Credentials** y usuario demo definido por variables de entorno (contraseña en texto solo para desarrollo; en producción usar OAuth o backend propio).
+- **NextAuth v5** con **Microsoft Entra ID** opcional (`AUTH_MICROSOFT_ENTRA_ID_*`) y credenciales demo opcionales (`AUTH_DEMO_*`).
 - **`src/middleware.ts`** protege `/dashboard/*` y APIs bajo `/api/parking/*` y `/api/payments/*`.
+- Guía Azure: [docs/MICROSOFT_ENTRA_ID.md](docs/MICROSOFT_ENTRA_ID.md).
 
-Sustituir credenciales demo por proveedor OAuth (Google, Azure AD) o base de usuarios sin cambiar el patrón de middleware.
+Sustituir o desactivar credenciales demo en producción; preferir solo Entra u otro IdP.
 
 ## Multi-tenant
 
-Variables `NEXT_PUBLIC_*` y activos en `public/tenant/`. Cada cliente puede tener su propio despliegue o, en el futuro, resolución de tenant por subdominio leyendo la misma `getTenantConfig()` extendida.
+Variables `NEXT_PUBLIC_*` y activos en `public/tenant/`. Detalle: [docs/TENANT_WHITELABEL.md](docs/TENANT_WHITELABEL.md).
 
 ## Pagos
 
-`POST /api/payments/intent` valida entrada con **Zod** y delega en `createMobilePaymentIntent` (`src/lib/payments/mobile-intent.ts`). Hoy devuelve un stub; el siguiente paso es llamar al PSP y persistir el estado.
+`POST /api/payments/intent` valida entrada con **Zod** y delega en `createMobilePaymentIntent` (`src/lib/payments/mobile-intent.ts`). Hoy devuelve un stub; extensión PSP: [docs/PAYMENTS_PSP.md](docs/PAYMENTS_PSP.md).
 
 ## Datos de edificios
 

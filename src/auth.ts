@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
 import { z } from "zod";
 
 declare module "next-auth" {
@@ -23,9 +24,37 @@ const credentialsSchema = z.object({
   password: z.string().min(1),
 });
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  trustHost: true,
-  providers: [
+function microsoftEntraConfigured(): boolean {
+  return Boolean(
+    process.env.AUTH_MICROSOFT_ENTRA_ID_ID?.trim() &&
+      process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET?.trim(),
+  );
+}
+
+function credentialsDemoConfigured(): boolean {
+  return Boolean(
+    process.env.AUTH_DEMO_EMAIL?.trim() &&
+      process.env.AUTH_DEMO_PASSWORD?.trim(),
+  );
+}
+
+const providers = [];
+
+if (microsoftEntraConfigured()) {
+  const tenantId = process.env.AUTH_MICROSOFT_ENTRA_ID_TENANT_ID?.trim();
+  providers.push(
+    MicrosoftEntraID({
+      clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_ID as string,
+      clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET as string,
+      ...(tenantId
+        ? { issuer: `https://login.microsoftonline.com/${tenantId}/v2.0` }
+        : {}),
+    }),
+  );
+}
+
+if (credentialsDemoConfigured()) {
+  providers.push(
     Credentials({
       name: "Correo y contraseña",
       credentials: {
@@ -53,7 +82,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         };
       },
     }),
-  ],
+  );
+}
+
+if (providers.length === 0) {
+  providers.push(
+    Credentials({
+      id: "misconfigured",
+      name: "Sin proveedores",
+      credentials: {},
+      authorize: async () => null,
+    }),
+  );
+}
+
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  trustHost: true,
+  providers,
   pages: {
     signIn: "/login",
   },
@@ -76,3 +121,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
 });
+
+export function isMicrosoftEntraLoginAvailable(): boolean {
+  return microsoftEntraConfigured();
+}
+
+export function isCredentialsLoginAvailable(): boolean {
+  return credentialsDemoConfigured();
+}
