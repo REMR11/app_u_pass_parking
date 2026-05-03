@@ -114,11 +114,22 @@ export function getNearbyParkingLots(maxDistance: number = 1000): ParkingLot[] {
 }
 
 export function getRecommendedLots(): ParkingLot[] {
-  // Recommendation algorithm: balance proximity and price
+  // Priority: 1. Available slots, 2. Proximity, 3. Price
   return [...parkingLots].sort((a, b) => {
-    const scoreA = a.distanceMeters * 0.4 + a.pricePerHour * 10 * 0.6;
-    const scoreB = b.distanceMeters * 0.4 + b.pricePerHour * 10 * 0.6;
-    return scoreA - scoreB;
+    // First: sort by availability (more available = better)
+    const availabilityA = a.availableSlots / a.totalSlots;
+    const availabilityB = b.availableSlots / b.totalSlots;
+    if (availabilityA !== availabilityB) {
+      return availabilityB - availabilityA; // Higher availability first
+    }
+    
+    // Second: sort by distance (closer = better)
+    if (a.distanceMeters !== b.distanceMeters) {
+      return a.distanceMeters - b.distanceMeters;
+    }
+    
+    // Third: sort by price (cheaper = better)
+    return a.pricePerHour - b.pricePerHour;
   });
 }
 
