@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { ParkingSlot, ParkingLevel, SlotCategory, SlotStatus } from "@/domain/parking/types";
-import { FloorPlanMap } from "./floor-plan-map";
+import { InteractiveFloorPlan } from "./interactive-floor-plan";
 
 interface ParkingGridProps {
   level: ParkingLevel;
@@ -301,9 +301,9 @@ export function ParkingGrid({
 
   return (
     <div>
-      {/* ── Floor plan mini-map ───────────────────────────────────────────── */}
-      <div className="bg-background rounded-2xl border border-muted p-4 mb-4 shadow-sm">
-        <FloorPlanMap
+      {/* ── Interactive floor plan with zoom/fullscreen ────────────────────── */}
+      <div className="bg-background rounded-2xl border border-muted p-3 mb-4 shadow-sm">
+        <InteractiveFloorPlan
           level={level}
           selectedSlotId={selectedSlotId}
           onSelectSlot={onSelectSlot}

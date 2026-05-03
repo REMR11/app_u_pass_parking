@@ -103,6 +103,9 @@ function buildLayoutA(levelId: string): ParkingLevel {
   };
 }
 
+/**
+ * Layout B: Large commercial center with multiple aisles (Metrocentro style)
+ */
 function buildLayoutB(levelId: string): ParkingLevel {
   // 10x16 grid — large commercial center with multiple aisles
   const grid: Array<CellType[]> = [
@@ -174,6 +177,229 @@ function buildLayoutB(levelId: string): ParkingLevel {
   };
 }
 
+/**
+ * Layout C: L-shaped parking (common in El Salvador office buildings)
+ * Irregular footprint with perimeter parking and central driving lane
+ */
+function buildLayoutC(levelId: string): ParkingLevel {
+  // 12x14 L-shaped grid
+  const grid: Array<CellType[]> = [
+    ["empty", "empty", "entrance", "entrance", "road", "road", "road", "road", "road", "empty", "empty", "empty", "empty", "empty"],
+    ["wall", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "empty", "empty", "empty", "empty", "empty"],
+    ["wall", "road", "road", "road", "road", "road", "road", "road", "road", "empty", "empty", "empty", "empty", "empty"],
+    ["wall", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "empty", "empty", "empty", "empty", "empty"],
+    ["wall", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "empty", "empty", "empty", "empty", "empty"],
+    ["wall", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "wall"],
+    ["wall", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "wall"],
+    ["wall", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "wall"],
+    ["wall", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "wall"],
+    ["wall", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "wall"],
+    ["wall", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "wall"],
+    ["empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "entrance", "entrance", "road", "road", "road", "empty"],
+  ];
+
+  const slots: ParkingSlot[] = [];
+  const floorPlan: FloorPlanCell[][] = [];
+  let slotIndex = 0;
+
+  for (let r = 0; r < grid.length; r++) {
+    const planRow: FloorPlanCell[] = [];
+    for (let c = 0; c < grid[r].length; c++) {
+      const cellType = grid[r][c];
+      const cell: FloorPlanCell = { type: cellType };
+
+      if (cellType === "entrance") {
+        cell.label = r < 6 ? "E1" : "E2";
+      } else if (cellType === "slot") {
+        const isAccessible = (r === 1 && c <= 2) || (r === 6 && c === 1);
+        const isElderly = (r === 1 && (c === 3 || c === 4));
+        const category = isAccessible ? "accessible" : isElderly ? "elderly" : "standard";
+        const proximityScore = Math.min(Math.abs(r - 0) + Math.abs(c - 3), Math.abs(r - 11) + Math.abs(c - 9));
+
+        const slotCode = `L${String.fromCharCode(65 + Math.floor(slotIndex / 12))}-${(slotIndex % 12) + 1}`;
+        const slotId = `${levelId}-slot-${slotIndex}`;
+        slotIndex++;
+
+        const status: SlotStatus = seededRand(slotIndex + 2000) > 0.45 ? "occupied" : "available";
+
+        slots.push({
+          id: slotId,
+          code: slotCode,
+          status,
+          category,
+          row: r,
+          col: c,
+          entranceProximity: proximityScore,
+        });
+
+        cell.slotId = slotId;
+      }
+
+      planRow.push(cell);
+    }
+    floorPlan.push(planRow);
+  }
+
+  return {
+    id: levelId,
+    name: "Nivel 1",
+    aisle: "Pasillo Principal",
+    slots,
+    floorPlan,
+    gridCols: grid[0].length,
+    gridRows: grid.length,
+  };
+}
+
+/**
+ * Layout D: Angular/trapezoidal parking (like the reference images)
+ * Represents complex mall parking with central structures
+ */
+function buildLayoutD(levelId: string): ParkingLevel {
+  // 14x18 irregular parking layout with central elevator/stair wells
+  const grid: Array<CellType[]> = [
+    ["empty", "empty", "empty", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "empty", "empty", "empty"],
+    ["empty", "entrance", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "entrance", "empty"],
+    ["slot", "road", "slot", "slot", "slot", "slot", "road", "slot", "slot", "slot", "slot", "road", "slot", "slot", "slot", "slot", "road", "slot"],
+    ["slot", "road", "slot", "slot", "slot", "slot", "road", "slot", "slot", "slot", "slot", "road", "slot", "slot", "slot", "slot", "road", "slot"],
+    ["slot", "road", "slot", "slot", "slot", "slot", "road", "wall", "wall", "wall", "wall", "road", "slot", "slot", "slot", "slot", "road", "slot"],
+    ["slot", "road", "road", "road", "road", "road", "road", "wall", "wall", "wall", "wall", "road", "road", "road", "road", "road", "road", "slot"],
+    ["slot", "slot", "slot", "slot", "slot", "slot", "road", "wall", "wall", "wall", "wall", "road", "slot", "slot", "slot", "slot", "slot", "slot"],
+    ["slot", "slot", "slot", "slot", "slot", "slot", "road", "road", "road", "road", "road", "road", "slot", "slot", "slot", "slot", "slot", "slot"],
+    ["slot", "road", "road", "road", "road", "road", "road", "slot", "slot", "slot", "slot", "road", "road", "road", "road", "road", "road", "slot"],
+    ["slot", "road", "slot", "slot", "slot", "slot", "road", "slot", "slot", "slot", "slot", "road", "slot", "slot", "slot", "slot", "road", "slot"],
+    ["slot", "road", "slot", "slot", "slot", "slot", "road", "slot", "slot", "slot", "slot", "road", "slot", "slot", "slot", "slot", "road", "slot"],
+    ["slot", "road", "slot", "slot", "slot", "slot", "road", "wall", "wall", "wall", "wall", "road", "slot", "slot", "slot", "slot", "road", "slot"],
+    ["empty", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "empty"],
+    ["empty", "empty", "empty", "empty", "empty", "empty", "entrance", "entrance", "entrance", "entrance", "entrance", "entrance", "empty", "empty", "empty", "empty", "empty", "empty"],
+  ];
+
+  const slots: ParkingSlot[] = [];
+  const floorPlan: FloorPlanCell[][] = [];
+  let slotIndex = 0;
+
+  for (let r = 0; r < grid.length; r++) {
+    const planRow: FloorPlanCell[] = [];
+    for (let c = 0; c < grid[r].length; c++) {
+      const cellType = grid[r][c];
+      const cell: FloorPlanCell = { type: cellType };
+
+      if (cellType === "entrance") {
+        cell.label = r < 2 ? "E1" : "E2";
+      } else if (cellType === "slot") {
+        const isAccessible = (r === 2 && (c === 2 || c === 3)) || (r === 9 && c === 2);
+        const isElderly = (r === 2 && (c === 4 || c === 5));
+        const category = isAccessible ? "accessible" : isElderly ? "elderly" : "standard";
+        const proximityScore = Math.min(
+          Math.abs(r - 1) + Math.abs(c - 1),
+          Math.abs(r - 1) + Math.abs(c - 16),
+          Math.abs(r - 13) + Math.abs(c - 9)
+        );
+
+        const slotCode = `P${String.fromCharCode(65 + Math.floor(slotIndex / 16))}-${(slotIndex % 16) + 1}`;
+        const slotId = `${levelId}-slot-${slotIndex}`;
+        slotIndex++;
+
+        const status: SlotStatus = seededRand(slotIndex + 3000) > 0.42 ? "occupied" : "available";
+
+        slots.push({
+          id: slotId,
+          code: slotCode,
+          status,
+          category,
+          row: r,
+          col: c,
+          entranceProximity: proximityScore,
+        });
+
+        cell.slotId = slotId;
+      }
+
+      planRow.push(cell);
+    }
+    floorPlan.push(planRow);
+  }
+
+  return {
+    id: levelId,
+    name: "Nivel 1",
+    aisle: "Área Principal",
+    slots,
+    floorPlan,
+    gridCols: grid[0].length,
+    gridRows: grid.length,
+  };
+}
+
+/**
+ * Layout E: Long parallel rows (outdoor lot style, like supermarkets)
+ */
+function buildLayoutE(levelId: string): ParkingLevel {
+  // 8x20 grid - long parallel parking rows
+  const grid: Array<CellType[]> = [
+    ["entrance", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "entrance"],
+    ["slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot"],
+    ["road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road"],
+    ["slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot"],
+    ["slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot"],
+    ["road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road"],
+    ["slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot", "slot"],
+    ["entrance", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "road", "entrance"],
+  ];
+
+  const slots: ParkingSlot[] = [];
+  const floorPlan: FloorPlanCell[][] = [];
+  let slotIndex = 0;
+
+  for (let r = 0; r < grid.length; r++) {
+    const planRow: FloorPlanCell[] = [];
+    for (let c = 0; c < grid[r].length; c++) {
+      const cellType = grid[r][c];
+      const cell: FloorPlanCell = { type: cellType };
+
+      if (cellType === "entrance") {
+        cell.label = c < 10 ? "E1" : "E2";
+      } else if (cellType === "slot") {
+        const isAccessible = r === 1 && (c === 0 || c === 1 || c === 18 || c === 19);
+        const isElderly = r === 1 && (c === 2 || c === 3 || c === 16 || c === 17);
+        const category = isAccessible ? "accessible" : isElderly ? "elderly" : "standard";
+        const proximityScore = Math.min(Math.abs(c - 0), Math.abs(c - 19)) + Math.abs(r - 0);
+
+        const slotCode = `R${r + 1}-${c + 1}`;
+        const slotId = `${levelId}-slot-${slotIndex}`;
+        slotIndex++;
+
+        const status: SlotStatus = seededRand(slotIndex + 4000) > 0.38 ? "occupied" : "available";
+
+        slots.push({
+          id: slotId,
+          code: slotCode,
+          status,
+          category,
+          row: r,
+          col: c,
+          entranceProximity: proximityScore,
+        });
+
+        cell.slotId = slotId;
+      }
+
+      planRow.push(cell);
+    }
+    floorPlan.push(planRow);
+  }
+
+  return {
+    id: levelId,
+    name: "Nivel 1",
+    aisle: "Estacionamiento Exterior",
+    slots,
+    floorPlan,
+    gridCols: grid[0].length,
+    gridRows: grid.length,
+  };
+}
+
 // Default center: San Salvador, El Salvador (Colonia Escalon / Zona Rosa)
 export const DEFAULT_CENTER = { lat: 13.7006, lng: -89.2295 };
 
@@ -238,8 +464,8 @@ const parkingLots: ParkingLot[] = [
     facilityType: "large",
     totalCapacity: 1800,
     levels: [
-      buildLayoutB("lot-003-level-1"),
-      buildLayoutB("lot-003-level-2"),
+      buildLayoutD("lot-003-level-1"), // Angular layout
+      buildLayoutD("lot-003-level-2"),
       buildLayoutB("lot-003-level-3"),
     ],
     totalSlots: 180,
@@ -258,7 +484,7 @@ const parkingLots: ParkingLot[] = [
     facilityType: "large",
     totalCapacity: 1600,
     levels: [
-      buildLayoutB("lot-004-level-1"),
+      buildLayoutC("lot-004-level-1"), // L-shaped layout
       buildLayoutB("lot-004-level-2"),
     ],
     totalSlots: 120,
@@ -293,7 +519,7 @@ const parkingLots: ParkingLot[] = [
     currency: "USD",
     facilityType: "regional",
     totalCapacity: 280,
-    levels: [buildLayoutA("lot-006-level-1"), buildLayoutA("lot-006-level-2")],
+    levels: [buildLayoutE("lot-006-level-1"), buildLayoutA("lot-006-level-2")], // Outdoor parallel rows
     totalSlots: 80,
     availableSlots: 38,
     rating: 3.9,
