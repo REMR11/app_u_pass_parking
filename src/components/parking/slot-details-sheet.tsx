@@ -10,77 +10,81 @@ interface SlotDetailsSheetProps {
   onClose: () => void;
 }
 
-function MapPinIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-      <circle cx="12" cy="10" r="3" />
-    </svg>
-  );
-}
-
-function TouchIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M12 11V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v18l5-3.5L17 21l-.5-8.5" />
-      <path d="M17 11a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H9" />
-    </svg>
-  );
-}
-
-export function SlotDetailsSheet({ slot, level, lot, onReserve, onClose }: SlotDetailsSheetProps) {
+export function SlotDetailsSheet({
+  slot,
+  level,
+  lot,
+  onReserve,
+  onClose,
+}: SlotDetailsSheetProps) {
   if (!slot || !level || !lot) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 animate-in slide-in-from-bottom duration-300">
-      {/* Backdrop */}
-      <div 
-        className="fixed inset-0 bg-black/20 -z-10" 
+    <div className="fixed inset-x-0 bottom-0 z-[1100] animate-in slide-in-from-bottom duration-250">
+      {/* Scrim */}
+      <div
+        className="fixed inset-0 bg-black/30 -z-10"
         onClick={onClose}
         aria-hidden="true"
       />
-      
-      {/* Sheet */}
-      <div className="bg-background rounded-t-3xl shadow-2xl border-t border-foreground/10">
-        {/* Handle */}
-        <div className="flex justify-center pt-3 pb-2">
-          <div className="w-10 h-1 rounded-full bg-foreground/20" />
+
+      {/* Sheet card */}
+      <div className="bg-background rounded-t-3xl shadow-2xl border-t border-muted">
+        {/* Drag handle */}
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="w-10 h-1 rounded-full bg-muted-foreground/25" />
         </div>
-        
-        <div className="px-6 pb-8">
-          {/* Location info */}
-          <p className="text-sm text-foreground/60">
-            {level.name} - {level.aisle}
+
+        <div className="px-5 pb-8 pt-3">
+          {/* Location context — small, secondary */}
+          <p className="text-xs text-muted-foreground uppercase tracking-wide">
+            {lot.name} &middot; {level.name}
           </p>
-          
-          {/* Slot identifier */}
-          <div className="flex items-center gap-2 mt-2">
-            <MapPinIcon className="w-5 h-5 text-primary" />
-            <h3 className="text-xl font-semibold">Lugar {slot.code}</h3>
+
+          {/* Slot code — hero element, must be readable at a glance */}
+          <div className="flex items-end justify-between mt-2 mb-4">
+            <div>
+              <p className="text-muted-foreground text-sm">Espacio seleccionado</p>
+              <h2 className="text-5xl font-black text-foreground leading-none mt-0.5">
+                {slot.code}
+              </h2>
+            </div>
+            {/* Status badge */}
+            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-success bg-success/10 px-3 py-1.5 rounded-full">
+              <span className="w-2 h-2 rounded-full bg-success" />
+              Disponible
+            </span>
           </div>
-          
-          {/* Status badge */}
-          <span className="inline-block mt-2 text-sm font-medium text-green-600">
-            Disponible
-          </span>
-          
-          {/* Price info */}
-          <div className="mt-4 p-3 bg-foreground/5 rounded-xl">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-foreground/70">Tarifa por hora</span>
-              <span className="font-semibold">
-                ${lot.pricePerHour} {lot.currency}
-              </span>
+
+          {/* Price row */}
+          <div className="flex items-center justify-between bg-muted/50 rounded-2xl px-4 py-3.5 mb-5">
+            <div>
+              <p className="text-xs text-muted-foreground">Tarifa</p>
+              <p className="text-2xl font-bold text-primary">
+                ${lot.pricePerHour.toFixed(2)}
+                <span className="text-sm font-normal text-muted-foreground"> /hr</span>
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-muted-foreground">Nivel</p>
+              <p className="text-base font-semibold text-foreground">{level.aisle}</p>
             </div>
           </div>
-          
-          {/* Reserve button */}
+
+          {/* Reserve CTA — full width, very tall for thumb reach */}
           <button
             onClick={onReserve}
-            className="w-full mt-6 flex items-center justify-center gap-3 bg-primary text-primary-foreground py-4 px-6 rounded-2xl font-medium text-lg transition-all hover:opacity-90 active:scale-[0.98]"
+            className="w-full py-5 bg-primary text-primary-foreground rounded-2xl font-bold text-lg active:scale-[0.98] transition-transform shadow-lg"
           >
-            <span>Reservar lugar</span>
-            <TouchIcon className="w-6 h-6" />
+            Reservar espacio {slot.code}
+          </button>
+
+          {/* Cancel — text link, not a big button */}
+          <button
+            onClick={onClose}
+            className="w-full mt-3 py-2 text-sm text-muted-foreground font-medium"
+          >
+            Cancelar
           </button>
         </div>
       </div>

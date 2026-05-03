@@ -1,60 +1,52 @@
 "use client";
 
-import type { ParkingSlot, SlotStatus } from "@/domain/parking/types";
+import type { ParkingSlot, ParkingLevel } from "@/domain/parking/types";
 
 interface ParkingGridProps {
+  level: ParkingLevel;
   slots: ParkingSlot[];
   selectedSlotId: string | null;
   onSelectSlot: (slot: ParkingSlot) => void;
 }
 
-function CarIcon({ status, isSelected }: { status: SlotStatus; isSelected: boolean }) {
-  const getColor = () => {
-    if (isSelected) return "#F97316"; // orange for selected
-    if (status === "available") return "#9CA3AF"; // gray for available
-    return "#2563EB"; // blue for occupied
-  };
+// Status-driven colours -------------------------------------------------------
+const STATUS_CONFIG = {
+  available: {
+    bg: "bg-muted/60",
+    border: "border-muted-foreground/20",
+    text: "text-foreground",
+    dot: "bg-success",
+    label: "Libre",
+    interactive: true,
+  },
+  occupied: {
+    bg: "bg-primary/10",
+    border: "border-primary/20",
+    text: "text-primary/60",
+    dot: "bg-primary",
+    label: "Ocupado",
+    interactive: false,
+  },
+  reserved: {
+    bg: "bg-warning/10",
+    border: "border-warning/30",
+    text: "text-warning",
+    dot: "bg-warning",
+    label: "Reservado",
+    interactive: false,
+  },
+  selected: {
+    bg: "bg-accent/10",
+    border: "border-accent",
+    text: "text-accent",
+    dot: "bg-accent",
+    label: "Seleccionado",
+    interactive: true,
+  },
+} as const;
 
-  return (
-    <svg viewBox="0 0 40 70" className="w-full h-full drop-shadow-sm">
-      {/* Car body */}
-      <rect
-        x="4"
-        y="10"
-        width="32"
-        height="50"
-        rx="8"
-        fill={getColor()}
-      />
-      {/* Roof/cabin */}
-      <rect
-        x="8"
-        y="20"
-        width="24"
-        height="20"
-        rx="4"
-        fill={status === "available" ? "#6B7280" : isSelected ? "#EA580C" : "#1D4ED8"}
-      />
-      {/* Windshield */}
-      <rect
-        x="10"
-        y="22"
-        width="20"
-        height="8"
-        rx="2"
-        fill={status === "available" ? "#4B5563" : isSelected ? "#C2410C" : "#1E40AF"}
-      />
-      {/* Headlights */}
-      <rect x="8" y="12" width="6" height="4" rx="1" fill="#E5E7EB" />
-      <rect x="26" y="12" width="6" height="4" rx="1" fill="#E5E7EB" />
-      {/* Taillights */}
-      <rect x="8" y="54" width="6" height="3" rx="1" fill="#EF4444" />
-      <rect x="26" y="54" width="6" height="3" rx="1" fill="#EF4444" />
-    </svg>
-  );
-}
-
-function ParkingSlotCell({
+// Single slot button ----------------------------------------------------------
+function SlotButton({
   slot,
   isSelected,
   onSelect,
@@ -63,84 +55,160 @@ function ParkingSlotCell({
   isSelected: boolean;
   onSelect: () => void;
 }) {
-  const isAvailable = slot.status === "available";
-  
+  const effectiveStatus = isSelected ? "selected" : slot.status;
+  const cfg = STATUS_CONFIG[effectiveStatus];
+  const isInteractive = slot.status === "available" || isSelected;
+
   return (
     <button
-      onClick={onSelect}
-      disabled={!isAvailable && !isSelected}
+      onClick={isInteractive ? onSelect : undefined}
+      disabled={!isInteractive}
+      aria-label={`Espacio ${slot.code} — ${cfg.label}`}
       className={`
-        relative w-12 h-16 sm:w-14 sm:h-20 flex items-center justify-center
-        transition-all duration-200
-        ${isSelected ? "ring-2 ring-primary ring-offset-2 rounded-lg bg-primary/10" : ""}
-        ${isAvailable && !isSelected ? "hover:bg-primary/5 hover:scale-105 cursor-pointer" : ""}
-        ${!isAvailable && !isSelected ? "cursor-default opacity-90" : ""}
+        relative flex items-center gap-3 w-full px-4 py-3.5
+        rounded-2xl border-2 transition-all duration-150 text-left
+        ${cfg.bg} ${cfg.border}
+        ${isSelected ? "shadow-md scale-[1.02]" : ""}
+        ${isInteractive ? "active:scale-[0.97] cursor-pointer" : "cursor-default opacity-70"}
       `}
-      aria-label={`Lugar ${slot.code} - ${isAvailable ? "Disponible" : "Ocupado"}`}
     >
-      <CarIcon status={slot.status} isSelected={isSelected} />
+      {/* Slot number — large, easy to read at a glance */}
+      <span className={`text-xl font-bold w-14 text-center flex-shrink-0 ${cfg.text}`}>
+        {slot.code}
+      </span>
+
+      {/* Status indicator */}
+      <div className="flex items-center gap-2 flex-1 min-w-0">
+        <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${cfg.dot}`} />
+        <span className={`text-sm font-medium ${cfg.text}`}>{cfg.label}</span>
+      </div>
+
+      {/* Arrow only for available/selected */}
+      {isInteractive && (
+        <svg
+          className={`w-5 h-5 flex-shrink-0 ${isSelected ? "text-accent" : "text-muted-foreground"}`}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+        >
+          <path d="M9 18l6-6-6-6" />
+        </svg>
+      )}
     </button>
   );
 }
 
-export function ParkingGrid({ slots, selectedSlotId, onSelectSlot }: ParkingGridProps) {
-  // Group slots by row
-  const rows = slots.reduce<Record<number, ParkingSlot[]>>((acc, slot) => {
+// Aisle group ----------------------------------------------------------------
+function AisleGroup({
+  aisleName,
+  slots,
+  selectedSlotId,
+  onSelectSlot,
+}: {
+  aisleName: string;
+  slots: ParkingSlot[];
+  selectedSlotId: string | null;
+  onSelectSlot: (slot: ParkingSlot) => void;
+}) {
+  const available = slots.filter((s) => s.status === "available").length;
+  const total = slots.length;
+
+  return (
+    <div>
+      {/* Aisle header */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <div className="w-1 h-5 bg-primary rounded-full" />
+          <span className="font-semibold text-sm text-foreground">
+            Pasillo {aisleName}
+          </span>
+        </div>
+        <span
+          className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+            available > 0
+              ? "bg-success/10 text-success"
+              : "bg-muted text-muted-foreground"
+          }`}
+        >
+          {available}/{total} libres
+        </span>
+      </div>
+
+      {/* Slot list */}
+      <div className="flex flex-col gap-2.5">
+        {slots.map((slot) => (
+          <SlotButton
+            key={slot.id}
+            slot={slot}
+            isSelected={slot.id === selectedSlotId}
+            onSelect={() => onSelectSlot(slot)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Main exported component ----------------------------------------------------
+export function ParkingGrid({
+  level,
+  slots,
+  selectedSlotId,
+  onSelectSlot,
+}: ParkingGridProps) {
+  // Group slots by row — each row represents an aisle
+  const aisleMap = slots.reduce<Record<number, ParkingSlot[]>>((acc, slot) => {
     if (!acc[slot.row]) acc[slot.row] = [];
     acc[slot.row].push(slot);
     return acc;
   }, {});
 
+  const aisleLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const aisleEntries = Object.entries(aisleMap).sort(
+    ([a], [b]) => Number(a) - Number(b)
+  );
+
+  const totalAvailable = slots.filter((s) => s.status === "available").length;
+
   return (
-    <div className="bg-background rounded-2xl p-4 sm:p-6 shadow-sm">
-      {/* Parking lane indicator */}
-      <div className="flex flex-col gap-3">
-        {Object.entries(rows).map(([rowNum, rowSlots]) => (
-          <div key={rowNum} className="flex items-center justify-center gap-1 sm:gap-2">
-            {/* Left side slots */}
-            <div className="flex gap-1 sm:gap-2">
-              {rowSlots.slice(0, Math.ceil(rowSlots.length / 2)).map((slot) => (
-                <ParkingSlotCell
-                  key={slot.id}
-                  slot={slot}
-                  isSelected={slot.id === selectedSlotId}
-                  onSelect={() => onSelectSlot(slot)}
-                />
-              ))}
-            </div>
-            
-            {/* Lane divider */}
-            <div className="w-8 sm:w-12 h-1 bg-foreground/10 rounded-full mx-1" />
-            
-            {/* Right side slots */}
-            <div className="flex gap-1 sm:gap-2">
-              {rowSlots.slice(Math.ceil(rowSlots.length / 2)).map((slot) => (
-                <ParkingSlotCell
-                  key={slot.id}
-                  slot={slot}
-                  isSelected={slot.id === selectedSlotId}
-                  onSelect={() => onSelectSlot(slot)}
-                />
-              ))}
-            </div>
-          </div>
-        ))}
+    <div>
+      {/* Summary bar */}
+      <div className="flex items-center justify-between mb-5">
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold text-foreground text-base">
+            {totalAvailable}
+          </span>{" "}
+          {totalAvailable === 1 ? "espacio libre" : "espacios libres"}
+        </p>
+        {/* Legend */}
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-success" />
+            Libre
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-primary" />
+            Ocupado
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-accent" />
+            Tu selección
+          </span>
+        </div>
       </div>
-      
-      {/* Legend */}
-      <div className="flex items-center justify-center gap-6 mt-6 text-xs text-foreground/60">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-sm bg-[#9CA3AF]" />
-          <span>Disponible</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-sm bg-[#2563EB]" />
-          <span>Ocupado</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-sm bg-[#F97316]" />
-          <span>Seleccionado</span>
-        </div>
+
+      {/* Aisles */}
+      <div className="flex flex-col gap-6">
+        {aisleEntries.map(([rowNum, rowSlots], i) => (
+          <AisleGroup
+            key={rowNum}
+            aisleName={aisleLetters[i] ?? rowNum}
+            slots={rowSlots}
+            selectedSlotId={selectedSlotId}
+            onSelectSlot={onSelectSlot}
+          />
+        ))}
       </div>
     </div>
   );

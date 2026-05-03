@@ -419,32 +419,40 @@ export default function ParkingPage() {
   }
 
   // ==========================================
-  // DESKTOP: Split View
+  // SLOT SELECTION VIEW (mobile + desktop)
   // ==========================================
   if (viewMode === "slots" && selectedLot) {
+    const availableInLevel = currentLevel
+      ? currentLevel.slots.filter((s) => s.status === "available").length
+      : 0;
+
     return (
-      <div className="min-h-screen bg-background flex flex-col">
-        {/* Header */}
-        <header className="bg-primary text-primary-foreground px-6 py-4">
-          <div className="flex items-center gap-4">
+      <div className="h-screen bg-muted/30 flex flex-col overflow-hidden">
+        {/* Header — compact, branded */}
+        <header className="bg-primary text-primary-foreground px-5 py-4 flex-shrink-0">
+          <div className="flex items-center gap-3">
             <button
               onClick={handleBackToMap}
-              className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
-              aria-label="Volver"
+              className="w-11 h-11 rounded-full bg-white/15 flex items-center justify-center active:bg-white/25 transition-colors flex-shrink-0"
+              aria-label="Volver al mapa"
             >
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M19 12H5M12 19l-7-7 7-7" />
               </svg>
             </button>
-            <div>
-              <h1 className="font-semibold text-lg">{selectedLot.name}</h1>
-              <p className="text-sm text-white/70">{selectedLot.address}</p>
+            <div className="min-w-0">
+              <h1 className="font-bold text-base leading-tight truncate">{selectedLot.name}</h1>
+              <p className="text-xs text-white/70 truncate">{selectedLot.address}</p>
+            </div>
+            {/* Available count chip */}
+            <div className="ml-auto flex-shrink-0 bg-white/15 rounded-full px-3 py-1 text-xs font-semibold">
+              {availableInLevel} libres
             </div>
           </div>
         </header>
 
-        {/* Level selector */}
-        <div className="px-6 py-4 border-b border-muted">
+        {/* Level tabs — horizontal scroll, always visible */}
+        <div className="bg-background border-b border-muted px-4 py-3 flex-shrink-0">
           <LevelSelector
             levels={selectedLot.levels}
             selectedLevelId={selectedLevelId || ""}
@@ -452,33 +460,23 @@ export default function ParkingPage() {
           />
         </div>
 
-        {/* Parking grid */}
-        {currentLevel && (
-          <div className="flex-1 px-6 py-4 overflow-auto">
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                {currentLevel.name} - {currentLevel.aisle}
-              </p>
-              <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <span className="w-3 h-3 rounded bg-muted border border-muted-foreground/30" />
-                  Disponible
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="w-3 h-3 rounded bg-primary/20" />
-                  Ocupado
-                </span>
-              </div>
-            </div>
+        {/* Scrollable slot list */}
+        {currentLevel ? (
+          <div className="flex-1 overflow-y-auto px-4 py-5 pb-32">
             <ParkingGrid
+              level={currentLevel}
               slots={currentLevel.slots}
               selectedSlotId={selectedSlot?.id || null}
               onSelectSlot={handleSelectSlot}
             />
           </div>
+        ) : (
+          <div className="flex-1 flex items-center justify-center text-muted-foreground">
+            Selecciona un nivel
+          </div>
         )}
 
-        {/* Slot details sheet */}
+        {/* Slot details sheet — slides up over content */}
         <SlotDetailsSheet
           slot={selectedSlot}
           level={currentLevel}
