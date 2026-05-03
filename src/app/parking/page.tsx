@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { ParkingGrid } from "@/components/parking/parking-grid";
 import { SlotDetailsSheet } from "@/components/parking/slot-details-sheet";
-import { ParkingMap } from "@/components/parking/parking-map";
+import { ParkingMap, type FilterMode } from "@/components/parking/parking-map";
 import { ParkingListCard } from "@/components/parking/parking-list-card";
 import { LevelSelector } from "@/components/parking/level-selector";
 import { FilterTabs, type FilterType } from "@/components/parking/filter-tabs";
@@ -132,6 +132,15 @@ export default function ParkingPage() {
   // Map center
   const mapCenter = userLocation || DEFAULT_CENTER;
 
+  // Convert filter type to map filter mode
+  const getMapFilterMode = (): FilterMode => {
+    switch (activeFilter) {
+      case "nearest": return "nearby";
+      case "cheapest": return "cheapest";
+      default: return "recommended";
+    }
+  };
+
   // Best lot (first in recommended list)
   const bestLot = filteredLots[0];
 
@@ -218,6 +227,7 @@ export default function ParkingPage() {
             selectedLotId={selectedLot?.id || null}
             onSelectLot={handleSelectLot}
             center={mapCenter}
+            filterMode={getMapFilterMode()}
           />
 
           {/* Top bar - minimal info */}
@@ -290,7 +300,7 @@ export default function ParkingPage() {
                 <div className="flex items-center gap-3 mt-1 text-sm">
                   <span className="text-success font-semibold">{bestLot.availableSlots} libres</span>
                   <span className="text-muted-foreground">{bestLot.distanceMeters}m</span>
-                  <span className="text-primary font-bold">${bestLot.pricePerHour}/hr</span>
+                  <span className="text-primary font-bold">${bestLot.pricePerHour.toFixed(2)}/hr</span>
                 </div>
               </div>
               <button
@@ -349,7 +359,7 @@ export default function ParkingPage() {
                   <p className="text-xs text-muted-foreground">Distancia</p>
                 </div>
                 <div className="bg-muted/50 rounded-xl p-3 text-center">
-                  <p className="text-2xl font-bold text-primary">${selectedLot.pricePerHour}</p>
+                  <p className="text-2xl font-bold text-primary">${selectedLot.pricePerHour.toFixed(2)}</p>
                   <p className="text-xs text-muted-foreground">Por hora</p>
                 </div>
                 <div className="bg-muted/50 rounded-xl p-3 text-center">
@@ -520,6 +530,7 @@ export default function ParkingPage() {
           selectedLotId={selectedLot?.id || null}
           onSelectLot={handleSelectLot}
           center={mapCenter}
+          filterMode={getMapFilterMode()}
         />
 
         {/* Locate me button */}
@@ -559,7 +570,7 @@ export default function ParkingPage() {
                   <h3 className="font-semibold text-foreground">{selectedLot.name}</h3>
                   <p className="text-sm text-muted-foreground truncate">{selectedLot.address}</p>
                   <div className="flex items-center gap-4 mt-2 text-sm">
-                    <span className="text-primary font-bold">${selectedLot.pricePerHour}/hr</span>
+                    <span className="text-primary font-bold">${selectedLot.pricePerHour.toFixed(2)}/hr</span>
                     <span className="text-success">{selectedLot.availableSlots} disponibles</span>
                     <span className="text-muted-foreground">{selectedLot.distanceMeters}m</span>
                   </div>
@@ -575,20 +586,23 @@ export default function ParkingPage() {
           </div>
         )}
 
-        {/* Legend */}
+        {/* Legend - context-aware based on filter */}
         <div className="absolute bottom-6 right-6 bg-white/95 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg text-xs">
-          <div className="flex items-center gap-4">
+          <p className="text-muted-foreground mb-1.5 font-medium">
+            {activeFilter === "nearest" ? "Por cercania" : activeFilter === "cheapest" ? "Por precio" : "Por disponibilidad"}
+          </p>
+          <div className="flex items-center gap-3">
             <span className="flex items-center gap-1.5">
               <span className="w-6 h-5 rounded-full bg-success text-white text-[10px] flex items-center justify-center font-medium">$</span>
-              Alta
+              Mejor
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-6 h-5 rounded-full bg-[#84cc16] text-white text-[10px] flex items-center justify-center font-medium">$</span>
+              Bueno
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-6 h-5 rounded-full bg-warning text-white text-[10px] flex items-center justify-center font-medium">$</span>
-              Media
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-6 h-5 rounded-full bg-destructive text-white text-[10px] flex items-center justify-center font-medium">$</span>
-              Baja
+              Regular
             </span>
           </div>
         </div>

@@ -37,19 +37,19 @@ function generateLevels(lotId: string, count: number): ParkingLevel[] {
   });
 }
 
-// Default center: Mexico City (Reforma area)
-export const DEFAULT_CENTER = { lat: 19.4326, lng: -99.1332 };
+// Default center: San Salvador, El Salvador (Zona Rosa area)
+export const DEFAULT_CENTER = { lat: 13.6989, lng: -89.2245 };
 
 const parkingLots: ParkingLot[] = [
   {
     id: "lot-001",
     buildingId: "bld-001",
-    name: "Torre Norte - Principal",
-    address: "Av. Principal 100, Nivel -1",
-    coordinates: { lat: 19.4340, lng: -99.1350 },
+    name: "Multiplaza Parking",
+    address: "Centro Comercial Multiplaza, Nivel -1",
+    coordinates: { lat: 13.6985, lng: -89.2320 },
     distanceMeters: 120,
-    pricePerHour: 25,
-    currency: "MXN",
+    pricePerHour: 1.50,
+    currency: "USD",
     levels: generateLevels("lot-001", 3),
     totalSlots: 72,
     availableSlots: 18,
@@ -58,12 +58,12 @@ const parkingLots: ParkingLot[] = [
   {
     id: "lot-002",
     buildingId: "bld-001",
-    name: "Torre Norte - Visitantes",
-    address: "Av. Principal 100, Nivel -2",
-    coordinates: { lat: 19.4335, lng: -99.1345 },
+    name: "Torre Futura",
+    address: "Colonia Escalon, 87 Av. Norte",
+    coordinates: { lat: 13.7015, lng: -89.2280 },
     distanceMeters: 180,
-    pricePerHour: 20,
-    currency: "MXN",
+    pricePerHour: 2.00,
+    currency: "USD",
     levels: generateLevels("lot-002", 2),
     totalSlots: 48,
     availableSlots: 12,
@@ -72,12 +72,12 @@ const parkingLots: ParkingLot[] = [
   {
     id: "lot-003",
     buildingId: "bld-002",
-    name: "Edificio Central",
-    address: "Calle Secundaria 45",
-    coordinates: { lat: 19.4310, lng: -99.1380 },
+    name: "Galerias Escalon",
+    address: "Paseo General Escalon",
+    coordinates: { lat: 13.6960, lng: -89.2380 },
     distanceMeters: 350,
-    pricePerHour: 15,
-    currency: "MXN",
+    pricePerHour: 0.75,
+    currency: "USD",
     levels: generateLevels("lot-003", 2),
     totalSlots: 48,
     availableSlots: 8,
@@ -86,16 +86,30 @@ const parkingLots: ParkingLot[] = [
   {
     id: "lot-004",
     buildingId: "bld-003",
-    name: "Plaza Comercial Sur",
-    address: "Blvd. Sur 200",
-    coordinates: { lat: 19.4280, lng: -99.1300 },
+    name: "La Gran Via",
+    address: "Carretera Panamericana",
+    coordinates: { lat: 13.6750, lng: -89.2450 },
     distanceMeters: 500,
-    pricePerHour: 12,
-    currency: "MXN",
+    pricePerHour: 1.00,
+    currency: "USD",
     levels: generateLevels("lot-004", 4),
     totalSlots: 96,
     availableSlots: 35,
     rating: 4.7,
+  },
+  {
+    id: "lot-005",
+    buildingId: "bld-004",
+    name: "Metrocentro",
+    address: "Boulevard de Los Heroes",
+    coordinates: { lat: 13.7120, lng: -89.2100 },
+    distanceMeters: 650,
+    pricePerHour: 0.50,
+    currency: "USD",
+    levels: generateLevels("lot-005", 3),
+    totalSlots: 120,
+    availableSlots: 45,
+    rating: 4.3,
   },
 ];
 

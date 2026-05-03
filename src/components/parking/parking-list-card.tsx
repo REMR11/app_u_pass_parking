@@ -76,7 +76,7 @@ export function ParkingListCard({ lot, isSelected, onSelect, rank }: ParkingList
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <span className="text-primary font-bold text-sm">
-                ${lot.pricePerHour}
+                ${lot.pricePerHour.toFixed(2)}
                 <span className="text-xs font-normal text-muted-foreground">/hr</span>
               </span>
               <span className="flex items-center gap-1 text-xs text-muted-foreground">

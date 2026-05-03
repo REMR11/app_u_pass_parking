@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import type { ParkingLot, Coordinates } from "@/domain/parking/types";
 
+export type FilterMode = "recommended" | "nearby" | "cheapest";
+
 type ParkingMapProps = {
   lots: ParkingLot[];
   userLocation: Coordinates | null;
@@ -10,6 +12,7 @@ type ParkingMapProps = {
   onSelectLot: (lot: ParkingLot) => void;
   center: Coordinates;
   onMapReady?: () => void;
+  filterMode?: FilterMode;
 };
 
 export function ParkingMap({
@@ -19,6 +22,7 @@ export function ParkingMap({
   onSelectLot,
   center,
   onMapReady,
+  filterMode = "recommended",
 }: ParkingMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -142,35 +146,71 @@ export function ParkingMap({
       markersRef.current.forEach((marker) => marker.remove());
       markersRef.current.clear();
 
-      // Create price pill marker
-      const createPriceIcon = (lot: ParkingLot, isSelected: boolean) => {
-        const availabilityPercent = (lot.availableSlots / lot.totalSlots) * 100;
-        const isAvailable = lot.availableSlots > 0;
+      // Get ranking position for each filter mode
+      const getRankings = () => {
+        const byAvailability = [...lots].sort((a, b) => 
+          (b.availableSlots / b.totalSlots) - (a.availableSlots / a.totalSlots)
+        );
+        const byDistance = [...lots].sort((a, b) => a.distanceMeters - b.distanceMeters);
+        const byPrice = [...lots].sort((a, b) => a.pricePerHour - b.pricePerHour);
         
-        // Color based on availability
-        let bgColor = "#22c55e"; // green
+        return { byAvailability, byDistance, byPrice };
+      };
+      
+      const rankings = getRankings();
+      
+      // Create price pill marker with filter-aware colors
+      const createPriceIcon = (lot: ParkingLot, isSelected: boolean) => {
+        const isAvailable = lot.availableSlots > 0;
         let textColor = "#ffffff";
+        let bgColor = "#9ca3af"; // gray for unavailable
+        
         if (!isAvailable) {
-          bgColor = "#9ca3af"; // gray
-        } else if (availabilityPercent < 20) {
-          bgColor = "#ef4444"; // red
-        } else if (availabilityPercent < 50) {
-          bgColor = "#f97316"; // orange
-        }
-
-        if (isSelected) {
-          bgColor = "#2563eb"; // primary blue
+          bgColor = "#9ca3af";
+        } else if (isSelected) {
+          bgColor = "#2563eb"; // primary blue when selected
+        } else {
+          // Color based on filter mode ranking
+          let rankingList: ParkingLot[];
+          
+          switch (filterMode) {
+            case "nearby":
+              rankingList = rankings.byDistance;
+              break;
+            case "cheapest":
+              rankingList = rankings.byPrice;
+              break;
+            case "recommended":
+            default:
+              rankingList = rankings.byAvailability;
+              break;
+          }
+          
+          const rank = rankingList.findIndex(l => l.id === lot.id);
+          const totalAvailable = rankingList.filter(l => l.availableSlots > 0).length;
+          const percentile = rank / totalAvailable;
+          
+          // Gradient: green (best) -> yellow -> orange -> red (worst)
+          if (percentile <= 0.25) {
+            bgColor = "#22c55e"; // green - top 25%
+          } else if (percentile <= 0.5) {
+            bgColor = "#84cc16"; // lime - top 50%
+          } else if (percentile <= 0.75) {
+            bgColor = "#f59e0b"; // amber - top 75%
+          } else {
+            bgColor = "#f97316"; // orange - bottom 25%
+          }
         }
 
         return L.divIcon({
           className: `price-marker ${isSelected ? "price-marker-selected" : ""}`,
           html: `
             <div class="price-marker-content" style="background-color: ${bgColor}; color: ${textColor};">
-              $${lot.pricePerHour}
+              $${lot.pricePerHour.toFixed(2)}
             </div>
           `,
-          iconSize: [60, 30],
-          iconAnchor: [30, 15],
+          iconSize: [70, 30],
+          iconAnchor: [35, 15],
         });
       };
 
@@ -189,7 +229,7 @@ export function ParkingMap({
     };
 
     loadMarkers();
-  }, [lots, selectedLotId, isLoaded, onSelectLot]);
+  }, [lots, selectedLotId, isLoaded, onSelectLot, filterMode]);
 
   // Update user location marker
   useEffect(() => {
