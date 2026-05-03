@@ -9,7 +9,7 @@ type ParkingListCardProps = {
   rank?: number;
 };
 
-export function ParkingListCard({ lot, isSelected, onSelect, rank }: ParkingListCardProps) {
+export function ParkingListCard({ lot, isSelected, onSelect }: ParkingListCardProps) {
   const availabilityPercent = (lot.availableSlots / lot.totalSlots) * 100;
   const isLarge = lot.facilityType === "large";
 

@@ -159,7 +159,7 @@ export default function ParkingPage() {
         new CustomEvent("center-map", { detail: bestLot.coordinates })
       );
     }
-  }, [activeFilter]); // Only trigger when filter changes
+  }, [activeFilter, bestLot, viewMode]);
 
   // ==========================================
   // MOBILE: Slots View
@@ -208,6 +208,7 @@ export default function ParkingPage() {
           <div className="flex-1 px-4 py-4 overflow-auto">
             <p className="text-sm text-muted-foreground mb-3">{currentLevel.aisle}</p>
             <ParkingGrid
+              level={currentLevel}
               slots={currentLevel.slots}
               selectedSlotId={selectedSlot?.id || null}
               onSelectSlot={handleSelectSlot}

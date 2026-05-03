@@ -181,7 +181,7 @@ export function ParkingMap({
       // Create price pill marker with filter-aware colors
       const createPriceIcon = (lot: ParkingLot, isSelected: boolean) => {
         const isAvailable = lot.availableSlots > 0;
-        let textColor = "#ffffff";
+        const textColor = "#ffffff";
         let bgColor = "#9ca3af"; // gray for unavailable
         
         if (!isAvailable) {
