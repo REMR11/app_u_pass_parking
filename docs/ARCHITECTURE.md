@@ -9,7 +9,7 @@ Base **mantenible** para gestión de acceso a estacionamiento en **varios edific
 1. **`src/app/`** — Rutas, layouts y composición. Mínima lógica de negocio.
 2. **`src/components/`** — UI reutilizable (presentación).
 3. **`src/domain/`** — Tipos y reglas de negocio puras (sin I/O).
-4. **`src/lib/`** — Adaptadores: almacenes en memoria, integración futura con DB y PSP.
+4. **`src/lib/`** — Adaptadores: almacenes en memoria, integración futura con DB, PSP y **notificaciones** (`src/lib/notifications/`).
 5. **`src/config/`** — Lectura de `process.env` para tenant y textos.
 6. **`src/app/api/`** — Route Handlers HTTP (JSON). Autenticación vía sesión + middleware.
 
@@ -20,6 +20,10 @@ Base **mantenible** para gestión de acceso a estacionamiento en **varios edific
 - Guía Azure: [docs/MICROSOFT_ENTRA_ID.md](docs/MICROSOFT_ENTRA_ID.md).
 
 Sustituir o desactivar credenciales demo en producción; preferir solo Entra u otro IdP.
+
+## Notificaciones
+
+Correo transaccional (Resend opcional): [docs/NOTIFICATIONS.md](docs/NOTIFICATIONS.md). Bienvenida opcional tras `signIn` según `NOTIFICATIONS_WELCOME`.
 
 ## Multi-tenant
 

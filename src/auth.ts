@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
 import { z } from "zod";
+import { maybeSendWelcomeAfterSignIn } from "@/lib/notifications/auth-hooks";
 
 declare module "next-auth" {
   interface Session {
@@ -119,6 +120,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return session;
     },
+  },
+  events: {
+    signIn: maybeSendWelcomeAfterSignIn,
   },
 });
 
