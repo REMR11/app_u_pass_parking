@@ -20,9 +20,19 @@ export function FloorPlanMap({
   // Build a lookup map slotId → ParkingSlot for fast access
   const slotById = useMemo(() => {
     const map: Record<string, ParkingSlot> = {};
+    if (!level?.slots) return map;
     for (const s of level.slots) map[s.id] = s;
     return map;
-  }, [level.slots]);
+  }, [level?.slots]);
+
+  // Guard: level or floor plan not ready yet
+  if (!level?.floorPlan || !level.slots) {
+    return (
+      <div className="h-28 flex items-center justify-center text-sm text-muted-foreground">
+        Cargando plano...
+      </div>
+    );
+  }
 
   const cols = level.gridCols;
   const rows = level.gridRows;

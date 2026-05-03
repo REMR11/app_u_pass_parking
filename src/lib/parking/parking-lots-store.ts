@@ -1,4 +1,14 @@
-import type { ParkingLot, ParkingSlot, ParkingLevel, FloorPlanCell, CellType } from "@/domain/parking/types";
+import type { ParkingLot, ParkingSlot, ParkingLevel, FloorPlanCell, CellType, SlotStatus } from "@/domain/parking/types";
+
+/**
+ * Deterministic pseudo-random based on a seed integer.
+ * Returns a value in [0, 1). Replaces Math.random() so SSR and client
+ * produce identical slot-status arrays and avoid hydration mismatches.
+ */
+function seededRand(seed: number): number {
+  const x = Math.sin(seed + 1) * 10000;
+  return x - Math.floor(x);
+}
 
 /**
  * Mock data for parking lots with pre-designed floor-plan layouts.
@@ -61,13 +71,13 @@ function buildLayoutA(levelId: string): ParkingLevel {
         const slotId = `${levelId}-slot-${slotIndex}`;
         slotIndex++;
 
-        // Randomly occupied
-        const isOccupied = Math.random() > 0.4;
-        
+        // Deterministic occupation — avoids SSR/client hydration mismatch
+        const status: SlotStatus = seededRand(slotIndex) > 0.4 ? "occupied" : "available";
+
         slots.push({
           id: slotId,
           code: slotCode,
-          status: isOccupied ? "occupied" : "available",
+          status,
           category,
           row: r,
           col: c,
@@ -132,12 +142,13 @@ function buildLayoutB(levelId: string): ParkingLevel {
         const slotId = `${levelId}-slot-${slotIndex}`;
         slotIndex++;
 
-        const isOccupied = Math.random() > 0.35;
-        
+        // Deterministic occupation — avoids SSR/client hydration mismatch
+        const status: SlotStatus = seededRand(slotIndex + 1000) > 0.35 ? "occupied" : "available";
+
         slots.push({
           id: slotId,
           code: slotCode,
-          status: isOccupied ? "occupied" : "available",
+          status,
           category,
           row: r,
           col: c,
