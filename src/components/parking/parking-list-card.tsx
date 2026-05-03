@@ -6,7 +6,6 @@ type ParkingListCardProps = {
   lot: ParkingLot;
   isSelected: boolean;
   onSelect: (lot: ParkingLot) => void;
-  rank?: number;
 };
 
 export function ParkingListCard({ lot, isSelected, onSelect }: ParkingListCardProps) {
