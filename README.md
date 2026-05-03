@@ -6,21 +6,29 @@ Módulo base para **acceso a estacionamiento multi-edificio** y **pagos móviles
 
 ```bash
 cp .env.example .env.local
-# Edita AUTH_SECRET y credenciales demo
+# Edita AUTH_SECRET; opcional: Entra ID (AUTH_MICROSOFT_ENTRA_ID_*) y/o credenciales demo
 npm install
 npm run dev
 ```
 
-Abre [http://localhost:3000](http://localhost:3000). Inicia sesión con `AUTH_DEMO_EMAIL` / `AUTH_DEMO_PASSWORD` definidos en `.env.local`.
+Abre [http://localhost:3000](http://localhost:3000). Puedes entrar con **Microsoft** si configuraste Entra ID, o con correo/contraseña demo si definiste `AUTH_DEMO_EMAIL` / `AUTH_DEMO_PASSWORD`.
 
 ## Documentación
 
 - [docs/V0_UI.md](docs/V0_UI.md) — Cómo usar **V0** con este repo (prompts, carpetas, convenciones).
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — Capas, auth, pagos y extensión futura.
+- [docs/MICROSOFT_ENTRA_ID.md](docs/MICROSOFT_ENTRA_ID.md) — Login con **Microsoft Entra ID** (Azure).
+- [docs/PAYMENTS_PSP.md](docs/PAYMENTS_PSP.md) — Integración de **pagos móviles** (PSP).
+- [docs/TENANT_WHITELABEL.md](docs/TENANT_WHITELABEL.md) — **Marca multi-empresa**.
+- [docs/NOTIFICATIONS.md](docs/NOTIFICATIONS.md) — **Correos** (bienvenida, reset, Resend).
 
-## Skill de Cursor
+## Skills de Cursor
 
-`.cursor/skills/parking-v0-ui/SKILL.md` orienta a agentes y a V0 sobre tokens, tenant y ubicación de componentes.
+- `.cursor/skills/parking-v0-ui/SKILL.md` — UI con V0.
+- `.cursor/skills/parking-auth-entra/SKILL.md` — Auth y Entra ID.
+- `.cursor/skills/parking-payments-psp/SKILL.md` — Pagos y PSP.
+- `.cursor/skills/parking-tenant-whitelabel/SKILL.md` — Marca y tenant.
+- `.cursor/skills/parking-notifications-email/SKILL.md` — Correos transaccionales.
 
 ## Scripts
 
@@ -30,10 +38,10 @@ Abre [http://localhost:3000](http://localhost:3000). Inicia sesión con `AUTH_DE
 
 ## Multi-tenant
 
-Ajusta `NEXT_PUBLIC_*` en `.env` y sustituye `public/tenant/logo.svg` por el logo del cliente (o usa `NEXT_PUBLIC_LOGO_URL`).
+Ajusta `NEXT_PUBLIC_*` en `.env` y sustituye `public/tenant/logo.svg` por el logo del cliente (o usa `NEXT_PUBLIC_LOGO_URL`). Los colores de marca viven en `src/app/globals.css` por despliegue.
 
 ## Producción
 
 - Genera `AUTH_SECRET` con `openssl rand -base64 32`.
-- En producción sustituye el login por **OAuth** (Google, Azure AD) o un backend de usuarios; la demo usa contraseña en texto solo por simplicidad local.
+- En producción usa **Microsoft Entra ID** (ver `docs/MICROSOFT_ENTRA_ID.md`) y elimina credenciales demo o déjalas vacías.
 - Configura el proveedor de pagos dentro de `src/lib/payments/mobile-intent.ts` manteniendo el contrato de la API.

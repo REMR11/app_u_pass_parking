@@ -1,9 +1,13 @@
 @import "tailwindcss";
 
+/**
+ * Paleta de marca (fija). Usar en Tailwind: bg-background, text-foreground,
+ * bg-primary, text-primary-foreground, bg-secondary, bg-accent, etc.
+ */
 :root {
-  --background: #fafafa;
-  --foreground: #0f172a;
-  --primary: hsl(var(--tenant-primary-hue, 217) 91% 48%);
+  --background: #f9f9f9;
+  --foreground: #1f2937;
+  --primary: #2563eb;
   --primary-foreground: #ffffff;
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
@@ -13,6 +17,8 @@
   --warning: #f59e0b;
   --destructive: #ef4444;
   --radius: 0.75rem;
+  --secondary: #f87124;
+  --accent: #b6cbf8;
 }
 
 @theme inline {
@@ -27,6 +33,8 @@
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-destructive: var(--destructive);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
