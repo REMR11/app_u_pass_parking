@@ -14,7 +14,7 @@ Al cambiar nombre de producto, logos, colores, textos legales o despliegues por 
 1. **Marca:** usar `getTenantConfig()` desde `@/config/tenant` o props; no incrustar nombres de empresa fijos en componentes genéricos.
 2. **Público vs secreto:** solo datos no sensibles en `NEXT_PUBLIC_*`. URLs de logo pueden ser públicas; API keys nunca.
 3. **Activos:** preferir `public/tenant/` por despliegue; `NEXT_PUBLIC_LOGO_URL` para CDN del cliente.
-4. **Colores:** el matiz primario viene de `NEXT_PUBLIC_PRIMARY_HUE` en el layout; en Tailwind usar `primary`, `background`, `foreground`.
+4. **Colores:** la paleta base vive en `src/app/globals.css` (`primary`, `secondary`, `accent`, `background`, `foreground`). Para otro cliente se pueden sustituir variables CSS o ampliar con tokens propios.
 5. **Entra ID:** es identidad (SSO), no sustituye esta configuración de marca salvo que documentes un mapeo explícito (por tenant de Azure a config).
 
 ## Referencias
