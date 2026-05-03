@@ -38,7 +38,7 @@ Abre [http://localhost:3000](http://localhost:3000). Puedes entrar con **Microso
 
 ## Multi-tenant
 
-Ajusta `NEXT_PUBLIC_*` en `.env` y sustituye `public/tenant/logo.svg` por el logo del cliente (o usa `NEXT_PUBLIC_LOGO_URL`).
+Ajusta `NEXT_PUBLIC_*` en `.env` y sustituye `public/tenant/logo.svg` por el logo del cliente (o usa `NEXT_PUBLIC_LOGO_URL`). Los colores de marca viven en `src/app/globals.css` por despliegue.
 
 ## Producción
 

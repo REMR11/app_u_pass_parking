@@ -9,7 +9,6 @@ export type TenantConfig = {
   logoPath: string;
   /** URL absoluta opcional para logo remoto (prioridad sobre logoPath si está definida) */
   logoUrl?: string;
-  primaryHue: string;
 };
 
 function readEnv(name: string, fallback: string): string {
@@ -24,6 +23,5 @@ export function getTenantConfig(): TenantConfig {
     supportEmail: readEnv("NEXT_PUBLIC_SUPPORT_EMAIL", "soporte@ejemplo.com"),
     logoPath: readEnv("NEXT_PUBLIC_LOGO_PATH", "/tenant/logo.svg"),
     logoUrl: process.env.NEXT_PUBLIC_LOGO_URL?.trim() || undefined,
-    primaryHue: readEnv("NEXT_PUBLIC_PRIMARY_HUE", "217"),
   };
 }

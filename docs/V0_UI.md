@@ -7,7 +7,7 @@ Este proyecto está preparado para que **V0** genere o refine componentes sin ro
 - **Framework:** Next.js 15 (App Router), **React 19**, **TypeScript**.
 - **Estilos:** Tailwind CSS v4 (`@import "tailwindcss"` en `src/app/globals.css`).
 - **Rutas:** páginas en `src/app/`, componentes reutilizables en `src/components/`.
-- **Colores:** usar clases `bg-background`, `text-foreground`, `bg-primary`, `text-primary-foreground`. El matiz del primario viene de `NEXT_PUBLIC_PRIMARY_HUE` en el `<body>` del layout.
+- **Colores:** usar clases `bg-background`, `text-foreground`, `bg-primary`, `text-primary-foreground`, `bg-secondary`, `bg-accent`. La paleta está en `src/app/globals.css`.
 - **Multi-tenant:** no hardcodear nombre de empresa ni URLs de logo; asumir props o `getTenantConfig()` desde `@/config/tenant` en Server Components.
 
 ## Prompt sugerido para V0
@@ -35,4 +35,4 @@ Tras generar, conecta rutas en `src/app/dashboard/...` y mantén las **Server Ac
 
 ## Referencia de tokens
 
-Ver `src/app/globals.css` para `--background`, `--foreground`, `--primary`.
+Ver `src/app/globals.css` para `--background`, `--foreground`, `--primary`, `--secondary`, `--accent`.

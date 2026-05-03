@@ -4,7 +4,8 @@ Este módulo está pensado para **replicarse por cliente** cambiando configuraci
 
 ## Configuración actual
 
-- **`src/config/tenant.ts`**: lee `NEXT_PUBLIC_APP_NAME`, `NEXT_PUBLIC_TENANT_SHORT_NAME`, `NEXT_PUBLIC_SUPPORT_EMAIL`, `NEXT_PUBLIC_LOGO_PATH`, `NEXT_PUBLIC_LOGO_URL`, `NEXT_PUBLIC_PRIMARY_HUE`.
+- **`src/config/tenant.ts`**: lee `NEXT_PUBLIC_APP_NAME`, `NEXT_PUBLIC_TENANT_SHORT_NAME`, `NEXT_PUBLIC_SUPPORT_EMAIL`, `NEXT_PUBLIC_LOGO_PATH`, `NEXT_PUBLIC_LOGO_URL`.
+- **Colores de marca:** definidos en `src/app/globals.css` (tokens Tailwind `background`, `foreground`, `primary`, `secondary`, `accent`).
 - **Logo**: archivo en `public/tenant/` (por defecto `logo.svg`) o URL remota con `NEXT_PUBLIC_LOGO_URL`.
 
 ## Despliegue por empresa (recomendado al inicio)
