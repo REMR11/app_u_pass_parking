@@ -337,8 +337,8 @@ export default function ParkingPage() {
 
         </div>
 
-        {/* ── FILTER PILLS ── in flex flow, always above card */}
-        <div className="flex-shrink-0 bg-foreground px-4 py-3 z-[1000]">
+        {/* ── FILTER PILLS ── transparent container, solid buttons only */}
+        <div className="flex-shrink-0 px-4 py-3 z-[1000]">
           <div className="flex gap-2.5 overflow-x-auto scrollbar-hide">
             {(
               [
@@ -350,10 +350,10 @@ export default function ParkingPage() {
               <button
                 key={f.key}
                 onClick={() => setActiveFilter(f.key)}
-                className={`flex-shrink-0 px-5 py-3 rounded-full font-black text-base transition-all ${
+                className={`flex-shrink-0 px-5 py-3 rounded-full font-black text-base transition-all shadow-lg ${
                   activeFilter === f.key
-                    ? "bg-primary text-white"
-                    : "bg-white/10 text-white border border-white/20"
+                    ? "bg-primary text-white shadow-primary/30"
+                    : "bg-[#111111] text-white shadow-black/50"
                 }`}
               >
                 {f.label}
