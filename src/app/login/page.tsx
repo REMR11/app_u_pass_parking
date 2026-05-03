@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { auth, isCredentialsLoginAvailable, isMicrosoftEntraLoginAvailable } from "@/auth";
 import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/auth/login-form";
 import { AppShell } from "@/components/layout/app-shell";
@@ -15,6 +15,9 @@ export default async function LoginPage({
     redirect(params.callbackUrl ?? "/dashboard");
   }
 
+  const showMicrosoftLogin = isMicrosoftEntraLoginAvailable();
+  const showCredentialsLogin = isCredentialsLoginAvailable();
+
   return (
     <AppShell
       nav={
@@ -29,7 +32,11 @@ export default async function LoginPage({
           Accede al panel de edificios y pagos de estacionamiento.
         </p>
         <div className="mt-8 rounded-xl border border-foreground/10 bg-foreground/[0.02] p-6">
-          <LoginForm callbackUrl={params.callbackUrl} />
+          <LoginForm
+            callbackUrl={params.callbackUrl}
+            showMicrosoftLogin={showMicrosoftLogin}
+            showCredentialsLogin={showCredentialsLogin}
+          />
         </div>
       </div>
     </AppShell>
