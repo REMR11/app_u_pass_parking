@@ -135,8 +135,7 @@ export function ParkingMap({
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       }).addTo(map);
 
-      // Add zoom control to bottom right
-      L.control.zoom({ position: "bottomright" }).addTo(map);
+      // Zoom control is rendered as custom JSX buttons below
 
       mapInstanceRef.current = map;
       setIsLoaded(true);
@@ -305,10 +304,22 @@ export function ParkingMap({
     }
   }, [selectedLotId, lots, isLoaded]);
 
+  // Expose zoom controls to parent via an imperative ref pattern using window events
+  useEffect(() => {
+    const handleZoomIn = () => { if (mapInstanceRef.current) mapInstanceRef.current.zoomIn(); };
+    const handleZoomOut = () => { if (mapInstanceRef.current) mapInstanceRef.current.zoomOut(); };
+    window.addEventListener("map-zoom-in", handleZoomIn);
+    window.addEventListener("map-zoom-out", handleZoomOut);
+    return () => {
+      window.removeEventListener("map-zoom-in", handleZoomIn);
+      window.removeEventListener("map-zoom-out", handleZoomOut);
+    };
+  }, []);
+
   return (
     <div className="relative w-full h-full">
       <div ref={mapRef} className="w-full h-full" />
-      
+
       {/* Loading state */}
       {!isLoaded && (
         <div className="absolute inset-0 flex items-center justify-center bg-muted">

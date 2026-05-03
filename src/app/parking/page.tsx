@@ -290,7 +290,32 @@ export default function ParkingPage() {
             </div>
           </div>
 
-          {/* ── LOCATION BUTTON ── far from top bar, high contrast */}
+          {/* ── ZOOM BUTTONS ── above location button, same round white/blue style */}
+          <div
+            className="absolute right-4 z-[1000] flex flex-col gap-2"
+            style={{ bottom: `${FILTER_BOTTOM + 64 + 56 + 12}px` }}
+          >
+            <button
+              onClick={() => window.dispatchEvent(new Event("map-zoom-in"))}
+              className="w-14 h-14 bg-white rounded-full shadow-xl border-2 border-primary/20 flex items-center justify-center active:scale-95 transition-all"
+              aria-label="Acercar"
+            >
+              <svg className="w-6 h-6 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            </button>
+            <button
+              onClick={() => window.dispatchEvent(new Event("map-zoom-out"))}
+              className="w-14 h-14 bg-white rounded-full shadow-xl border-2 border-primary/20 flex items-center justify-center active:scale-95 transition-all"
+              aria-label="Alejar"
+            >
+              <svg className="w-6 h-6 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M5 12h14" />
+              </svg>
+            </button>
+          </div>
+
+          {/* ── LOCATION BUTTON ── below zoom buttons, same style */}
           <button
             onClick={() => {
               if (userLocation) {
