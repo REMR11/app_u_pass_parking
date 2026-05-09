@@ -7,18 +7,37 @@ interface NavItem {
   href: string;
   label: string;
   icon: React.ReactNode;
+  activeIcon: React.ReactNode;
 }
 
-function HomeIcon({ className }: { className?: string }) {
+function MapIcon({ className, filled }: { className?: string; filled?: boolean }) {
+  if (filled) {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+        <circle cx="12" cy="10" r="3" fill="white" />
+      </svg>
+    );
+  }
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-      <polyline points="9,22 9,12 15,12 15,22" />
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+      <circle cx="12" cy="10" r="3" />
     </svg>
   );
 }
 
-function CalendarIcon({ className }: { className?: string }) {
+function CalendarIcon({ className, filled }: { className?: string; filled?: boolean }) {
+  if (filled) {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+        <rect x="3" y="4" width="18" height="6" rx="2" ry="2" fill="currentColor" />
+        <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" strokeWidth="2" />
+        <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" strokeWidth="2" />
+      </svg>
+    );
+  }
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -29,7 +48,15 @@ function CalendarIcon({ className }: { className?: string }) {
   );
 }
 
-function CreditCardIcon({ className }: { className?: string }) {
+function CreditCardIcon({ className, filled }: { className?: string; filled?: boolean }) {
+  if (filled) {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+        <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+        <rect x="1" y="10" width="22" height="4" fill="white" opacity="0.3" />
+      </svg>
+    );
+  }
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
@@ -38,7 +65,15 @@ function CreditCardIcon({ className }: { className?: string }) {
   );
 }
 
-function UserIcon({ className }: { className?: string }) {
+function UserIcon({ className, filled }: { className?: string; filled?: boolean }) {
+  if (filled) {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="12" cy="7" r="4" />
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      </svg>
+    );
+  }
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -48,35 +83,62 @@ function UserIcon({ className }: { className?: string }) {
 }
 
 const navItems: NavItem[] = [
-  { href: "/parking", label: "Inicio", icon: <HomeIcon className="w-6 h-6" /> },
-  { href: "/parking/reservations", label: "Mis reservas", icon: <CalendarIcon className="w-6 h-6" /> },
-  { href: "/dashboard/payments", label: "Pago", icon: <CreditCardIcon className="w-6 h-6" /> },
-  { href: "/dashboard", label: "Perfil", icon: <UserIcon className="w-6 h-6" /> },
+  { 
+    href: "/parking", 
+    label: "Mapa", 
+    icon: <MapIcon className="w-6 h-6" />,
+    activeIcon: <MapIcon className="w-6 h-6" filled />
+  },
+  { 
+    href: "/parking/reservations", 
+    label: "Reservas", 
+    icon: <CalendarIcon className="w-6 h-6" />,
+    activeIcon: <CalendarIcon className="w-6 h-6" filled />
+  },
+  { 
+    href: "/dashboard/payments", 
+    label: "Pagos", 
+    icon: <CreditCardIcon className="w-6 h-6" />,
+    activeIcon: <CreditCardIcon className="w-6 h-6" filled />
+  },
+  { 
+    href: "/dashboard", 
+    label: "Perfil", 
+    icon: <UserIcon className="w-6 h-6" />,
+    activeIcon: <UserIcon className="w-6 h-6" filled />
+  },
 ];
 
 export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 bg-background border-t border-foreground/10 pb-safe">
-      <div className="flex items-center justify-around h-16 max-w-md mx-auto">
+    <nav className="fixed inset-x-0 bottom-0 z-40 bg-background/95 backdrop-blur-sm border-t border-foreground/10 lg:hidden">
+      <div className="flex items-center justify-around h-16 max-w-md mx-auto pb-safe">
         {navItems.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+          // Check if this nav item is active
+          const isActive = pathname === item.href || 
+            (item.href !== "/dashboard" && pathname.startsWith(item.href + "/")) ||
+            (item.href === "/dashboard" && pathname === "/dashboard");
           
           return (
             <Link
               key={item.href}
               href={item.href}
               className={`
-                flex flex-col items-center gap-1 px-4 py-2 transition-colors
+                flex flex-col items-center justify-center gap-0.5 px-4 py-2 min-w-[64px] transition-all
                 ${isActive 
                   ? "text-primary" 
-                  : "text-foreground/50 hover:text-foreground/70"
+                  : "text-foreground/50 active:text-foreground/70"
                 }
               `}
             >
-              {item.icon}
-              <span className="text-xs font-medium">{item.label}</span>
+              <span className="transition-transform duration-200 ease-out" style={{ transform: isActive ? 'scale(1.1)' : 'scale(1)' }}>
+                {isActive ? item.activeIcon : item.icon}
+              </span>
+              <span className={`text-[10px] font-semibold ${isActive ? 'text-primary' : ''}`}>
+                {item.label}
+              </span>
             </Link>
           );
         })}

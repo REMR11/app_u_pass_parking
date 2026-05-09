@@ -28,7 +28,7 @@ export function LoginForm({
       email,
       password,
       redirect: false,
-      callbackUrl: callbackUrl ?? "/dashboard",
+      callbackUrl: callbackUrl ?? "/parking",
     });
     setLoading(false);
     if (res?.error) {
@@ -44,7 +44,7 @@ export function LoginForm({
   async function onMicrosoftSignIn() {
     setError(null);
     setMsLoading(true);
-    await signIn("microsoft-entra-id", { callbackUrl: callbackUrl ?? "/dashboard" });
+    await signIn("microsoft-entra-id", { callbackUrl: callbackUrl ?? "/parking" });
     setMsLoading(false);
   }
 
