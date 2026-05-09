@@ -11,7 +11,7 @@ function SignOutButton() {
         type="submit"
         className="w-full py-4 rounded-2xl border-2 border-destructive/20 text-destructive font-semibold text-base transition-all active:scale-[0.98] hover:bg-destructive/5"
       >
-        Cerrar sesion
+        Cerrar sesión
       </button>
     </form>
   );
@@ -55,7 +55,7 @@ export default async function DashboardHome() {
       {/* Quick actions - Mobile card style */}
       <div className="space-y-3">
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider px-1">
-          Acciones rapidas
+          Acciones rápidas
         </h2>
         <div className="space-y-2">
           <Link
@@ -105,8 +105,8 @@ export default async function DashboardHome() {
               </svg>
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-foreground">Metodos de pago</h3>
-              <p className="text-sm text-muted-foreground">Gestionar pagos moviles</p>
+              <h3 className="font-semibold text-foreground">Métodos de pago</h3>
+              <p className="text-sm text-muted-foreground">Gestionar pagos móviles</p>
             </div>
             <ChevronRightIcon className="w-5 h-5 text-muted-foreground flex-shrink-0" />
           </Link>
@@ -116,7 +116,7 @@ export default async function DashboardHome() {
       {/* Admin section - Only show on larger screens or if needed */}
       <div className="space-y-3 hidden lg:block">
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider px-1">
-          Administracion
+          Administración
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <Link
@@ -124,7 +124,7 @@ export default async function DashboardHome() {
             className="rounded-xl border border-foreground/10 p-6 transition hover:border-primary/40 hover:bg-primary/5"
           >
             <h3 className="font-medium">Edificios</h3>
-            <p className="mt-2 text-sm text-foreground/65">Ver ocupacion y detalle por edificio.</p>
+            <p className="mt-2 text-sm text-foreground/65">Ver ocupación y detalle por edificio.</p>
           </Link>
         </div>
       </div>
@@ -132,7 +132,7 @@ export default async function DashboardHome() {
       {/* App info */}
       <div className="space-y-3">
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider px-1">
-          Informacion
+          Información
         </h2>
         <div className="p-4 rounded-2xl bg-muted/50 border border-foreground/5">
           <p className="text-sm text-muted-foreground">

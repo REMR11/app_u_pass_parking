@@ -49,7 +49,7 @@ export default async function LoginPage({
               callbackUrl={params.callbackUrl ?? "/parking"}
               showMicrosoftLogin={showMicrosoftLogin}
               showCredentialsLogin={showCredentialsLogin}
-              errorMessage={params.error === "CredentialsSignin" ? "Credenciales invalidas" : undefined}
+              errorMessage={params.error === "CredentialsSignin" ? "Credenciales inválidas" : undefined}
             />
           </div>
 

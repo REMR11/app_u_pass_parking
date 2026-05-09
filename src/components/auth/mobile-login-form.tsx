@@ -38,22 +38,22 @@ export function MobileLoginForm({
     
     // Client-side validation
     if (!email.trim()) {
-      setError("Ingresa tu correo electronico");
+      setError("Ingresa tu correo electrónico");
       return;
     }
     
     if (!isValidEmail(email)) {
-      setError("Ingresa un correo electronico valido");
+      setError("Ingresa un correo electrónico válido");
       return;
     }
     
     if (!password.trim()) {
-      setError("Ingresa tu contrasena");
+      setError("Ingresa tu contraseña");
       return;
     }
     
     if (password.length < 4) {
-      setError("La contrasena debe tener al menos 4 caracteres");
+      setError("La contraseña debe tener al menos 4 caracteres");
       return;
     }
 
@@ -71,7 +71,7 @@ export function MobileLoginForm({
       setLoading(false);
       
       if (res?.error) {
-        setError("Credenciales invalidas. Verifica tu correo y contrasena.");
+        setError("Credenciales inválidas. Verifica tu correo y contraseña.");
         return;
       }
       
@@ -81,7 +81,7 @@ export function MobileLoginForm({
       }
     } catch {
       setLoading(false);
-      setError("Error de conexion. Intenta nuevamente.");
+      setError("Error de conexión. Intenta nuevamente.");
     }
   }
 
@@ -92,7 +92,7 @@ export function MobileLoginForm({
       await signIn("microsoft-entra-id", { callbackUrl });
     } catch {
       setMsLoading(false);
-      setError("Error al conectar con Microsoft");
+      setError("Error al conectar con Microsoft.");
     }
   }
 
@@ -143,7 +143,7 @@ export function MobileLoginForm({
           {/* Email input */}
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium text-foreground">
-              Correo electronico
+              Correo electrónico
             </label>
             <div className="relative">
               <input
@@ -175,7 +175,7 @@ export function MobileLoginForm({
           {/* Password input */}
           <div className="space-y-2">
             <label htmlFor="password" className="text-sm font-medium text-foreground">
-              Contrasena
+              Contraseña
             </label>
             <div className="relative">
               <input
@@ -188,14 +188,14 @@ export function MobileLoginForm({
                   setPassword(e.target.value);
                   if (error) setError(null);
                 }}
-                placeholder="Tu contrasena"
+                placeholder="Tu contraseña"
                 className="w-full h-14 px-4 pr-14 rounded-2xl border-2 border-foreground/10 bg-background text-foreground placeholder:text-muted-foreground/60 text-base outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/10"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground transition-colors"
-                aria-label={showPassword ? "Ocultar contrasena" : "Mostrar contrasena"}
+                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
               >
                 {showPassword ? (
                   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -236,7 +236,7 @@ export function MobileLoginForm({
                 Entrando...
               </span>
             ) : (
-              "Iniciar sesion"
+              "Iniciar sesión"
             )}
           </button>
         </form>
@@ -245,7 +245,7 @@ export function MobileLoginForm({
       {/* No providers configured */}
       {!showMicrosoftLogin && !showCredentialsLogin && (
         <p className="text-sm text-center text-muted-foreground">
-          No hay metodos de inicio de sesion disponibles.
+          No hay métodos de inicio de sesión disponibles.
         </p>
       )}
     </div>
