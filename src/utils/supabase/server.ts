@@ -1,17 +1,23 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/ssr";
 import type { cookies } from "next/headers";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-export function createClient(cookieStore: Awaited<ReturnType<typeof cookies>>) {
-  if (!supabaseUrl?.trim() || !supabaseKey?.trim()) {
+export function hasSupabaseCredentials(): boolean {
+  return Boolean(supabaseUrl?.trim() && supabaseKey?.trim());
+}
+
+/** Cliente servidor para Route Handlers, Server Actions y RSC. Requiere variables configuradas. */
+export function createClient(cookieStore: Awaited<ReturnType<typeof cookies>>): SupabaseClient {
+  if (!hasSupabaseCredentials()) {
     throw new Error(
-      "Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY. Copy .env.example to .env.local.",
+      "Faltan NEXT_PUBLIC_SUPABASE_URL o NEXT_PUBLIC_SUPABASE_ANON_KEY. Copia .env.example a .env.local.",
     );
   }
 
-  return createServerClient(supabaseUrl, supabaseKey, {
+  return createServerClient(supabaseUrl!, supabaseKey!, {
     cookies: {
       getAll() {
         return cookieStore.getAll();
@@ -22,7 +28,7 @@ export function createClient(cookieStore: Awaited<ReturnType<typeof cookies>>) {
             cookieStore.set(name, value, options),
           );
         } catch {
-          // Llamado desde un Server Component sin mutar cookies; el middleware refresca la sesión.
+          // Server Component u otra ruta sin mutar cookies; el middleware refresca la sesión.
         }
       },
     },

@@ -1,24 +1,27 @@
 ---
 name: parking-auth-entra
-description: Configurar y extender autenticación con Microsoft Entra ID y NextAuth en el módulo parking.
+description: SSO corporativo (Azure/Microsoft) integrado vía Supabase Auth en el módulo parking.
 ---
 
-# Skill: Auth con Microsoft Entra ID
+# Skill: SSO Microsoft / Azure con Supabase
 
-## Cuándo usar
+## Estado del repo
 
-Al tocar `src/auth.ts`, `/login`, variables `AUTH_*`, registro de aplicación en Azure o flujos OAuth.
+El login principal es **correo + contraseña** con **Supabase Auth** (`src/app/auth/actions.ts`, `docs/SUPABASE.md`).  
+Este skill aplica cuando quieras **Microsoft / Azure AD** además del correo.
+
+## Enfoque recomendado
+
+Configura el proveedor **Azure** en el dashboard de Supabase (Authentication → Providers) y usa **`signInWithOAuth`** con el cliente navegador (`createBrowserSupabaseClient`). El callback de la app es **`/auth/callback`** (`src/app/auth/callback/route.ts`), no NextAuth.
 
 ## Reglas
 
-1. **Proveedor:** usar `MicrosoftEntraID` desde `next-auth/providers/microsoft-entra-id`. El id del proveedor es `microsoft-entra-id` (para `signIn("microsoft-entra-id", …)`).
-2. **Callback URL** en Azure debe coincidir con `{AUTH_URL o origen}/api/auth/callback/microsoft-entra-id`. Documentar en `docs/MICROSOFT_ENTRA_ID.md`.
-3. **Producción:** definir `AUTH_MICROSOFT_ENTRA_ID_TENANT_ID` con el GUID del directorio para restringir inicio de sesión al tenant corporativo cuando aplique.
-4. **No** mezclar lógica de marca multi-empresa dentro de callbacks de Entra salvo que mapees claims explícitos (por ejemplo `tid`) a configuración interna **no** pública.
-5. **Credenciales demo:** solo para desarrollo; en producción preferir solo Entra u otro IdP y eliminar `AUTH_DEMO_PASSWORD`.
-6. **Sesión:** mantener JWT + `session.user.id` estable; si añades campos a la sesión, extender tipos en `declare module "next-auth"` en `src/auth.ts`.
+1. No reintroducir **NextAuth** para Entra salvo decisión explícita del equipo (duplica sesiones y mantenimiento).
+2. Añadir la URL de callback de Supabase (`…/auth/v1/callback` la gestiona Supabase; tu app usa `/auth/callback` para el intercambio PKCE).
+3. Mantén la lógica de marca (`NEXT_PUBLIC_*`) fuera de claims OAuth salvo mapeo documentado.
+4. Producción: restricción por tenant vía configuración del proveedor en Sup/Azure, no credenciales demo.
 
 ## Referencias
 
-- `docs/MICROSOFT_ENTRA_ID.md`
-- `docs/ARCHITECTURE.md` (sección autenticación)
+- [docs/SUPABASE.md](docs/SUPABASE.md)
+- [docs/MICROSOFT_ENTRA_ID.md](docs/MICROSOFT_ENTRA_ID.md) (referencia Azure clásica; adaptar pasos al proveedor Supabase)
