@@ -30,6 +30,8 @@ Abre [http://localhost:3000](http://localhost:3000). Puedes entrar con **Microso
 - `.cursor/skills/parking-tenant-whitelabel/SKILL.md` — Marca y tenant.
 - `.cursor/skills/parking-notifications-email/SKILL.md` — Correos transaccionales.
 
+Skills opcionales de Supabase (CLI): `npx skills add supabase/agent-skills` — quedan en `.agents/skills/` si las instalas.
+
 ## Scripts
 
 - `npm run dev` — desarrollo

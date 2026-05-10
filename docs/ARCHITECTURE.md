@@ -25,6 +25,10 @@ Sustituir o desactivar credenciales demo en producción; preferir solo Entra u o
 
 Correo transaccional (Resend opcional): [docs/NOTIFICATIONS.md](docs/NOTIFICATIONS.md). Bienvenida opcional tras `signIn` según `NOTIFICATIONS_WELCOME`.
 
+## Supabase (opcional)
+
+Cliente en `src/utils/supabase/` (`server`, `client`, `middleware`). Sin `NEXT_PUBLIC_SUPABASE_*`, el refresco de sesión no hace efecto y la app sigue funcionando con NextAuth solo.
+
 ## Multi-tenant
 
 Variables `NEXT_PUBLIC_*` y activos en `public/tenant/`. Detalle: [docs/TENANT_WHITELABEL.md](docs/TENANT_WHITELABEL.md).

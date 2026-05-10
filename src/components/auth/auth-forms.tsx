@@ -58,10 +58,7 @@ export function AuthForms({
           errorMessage={errorMessage}
         />
       ) : (
-        <RegisterForm
-          callbackUrl={callbackUrl}
-          onSwitchToLogin={() => setActiveTab("login")}
-        />
+        <RegisterForm onSwitchToLogin={() => setActiveTab("login")} />
       )}
     </div>
   );
@@ -330,11 +327,10 @@ function LoginForm({
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface RegisterFormProps {
-  callbackUrl: string;
   onSwitchToLogin: () => void;
 }
 
-function RegisterForm({ callbackUrl, onSwitchToLogin }: RegisterFormProps) {
+function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

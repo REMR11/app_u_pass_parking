@@ -32,13 +32,6 @@ function microsoftEntraConfigured(): boolean {
   );
 }
 
-function credentialsDemoConfigured(): boolean {
-  return Boolean(
-    process.env.AUTH_DEMO_EMAIL?.trim() &&
-      process.env.AUTH_DEMO_PASSWORD?.trim(),
-  );
-}
-
 const providers = [];
 
 if (microsoftEntraConfigured()) {
