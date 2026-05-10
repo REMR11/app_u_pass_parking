@@ -17,10 +17,13 @@ Abre [http://localhost:3000](http://localhost:3000). Inicia sesión con `AUTH_DE
 
 - [docs/V0_UI.md](docs/V0_UI.md) — Cómo usar **V0** con este repo (prompts, carpetas, convenciones).
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — Capas, auth, pagos y extensión futura.
+- [docs/SUPABASE.md](docs/SUPABASE.md) — Cliente SSR/browser y middleware de sesión Supabase.
 
 ## Skill de Cursor
 
 `.cursor/skills/parking-v0-ui/SKILL.md` orienta a agentes y a V0 sobre tokens, tenant y ubicación de componentes.
+
+Skills opcionales de Supabase (CLI): `npx skills add supabase/agent-skills` — quedan en `.agents/skills/` si las instalas.
 
 ## Scripts
 

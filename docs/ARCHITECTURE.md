@@ -16,9 +16,13 @@ Base **mantenible** para gestión de acceso a estacionamiento en **varios edific
 ## Autenticación
 
 - **NextAuth v5** con proveedor **Credentials** y usuario demo definido por variables de entorno (contraseña en texto solo para desarrollo; en producción usar OAuth o backend propio).
-- **`src/middleware.ts`** protege `/dashboard/*` y APIs bajo `/api/parking/*` y `/api/payments/*`.
+- **`src/middleware.ts`** protege `/dashboard/*` y APIs bajo `/api/parking/*` y `/api/payments/*`, y refresca la sesión de **Supabase Auth** cuando están configuradas las variables (ver [docs/SUPABASE.md](SUPABASE.md)).
 
 Sustituir credenciales demo por proveedor OAuth (Google, Azure AD) o base de usuarios sin cambiar el patrón de middleware.
+
+## Supabase (opcional)
+
+Cliente en `src/utils/supabase/` (`server`, `client`, `middleware`). Sin `NEXT_PUBLIC_SUPABASE_*`, el refresco de sesión no hace efecto y la app sigue funcionando con NextAuth solo.
 
 ## Multi-tenant
 
