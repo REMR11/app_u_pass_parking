@@ -1,9 +1,11 @@
+@import url("https://unpkg.com/leaflet@1.9.4/dist/leaflet.css");
 @import "tailwindcss";
 
 /**
  * Paleta de marca + tokens UI (mapa / conductor).
  * Marca: background, foreground, primary, secondary, accent.
  * Utilidades: muted, success, warning, destructive.
+ * Mapa: tiers de marcadores (percentiles) alineados con la leyenda.
  */
 :root {
   --background: #f9f9f9;
@@ -20,6 +22,9 @@
   --warning: #f59e0b;
   --destructive: #ef4444;
   --radius: 0.75rem;
+  --map-marker-unavailable: #9ca3af;
+  --map-marker-tier-lime: #84cc16;
+  --map-marker-tier-orange: #f97316;
 }
 
 @theme inline {
@@ -52,6 +57,9 @@
     --accent-foreground: #0f172a;
     --muted: #1e293b;
     --muted-foreground: #94a3b8;
+    --map-marker-unavailable: #64748b;
+    --map-marker-tier-lime: #a3e635;
+    --map-marker-tier-orange: #fb923c;
   }
 }
 
@@ -120,6 +128,86 @@ body {
 
 .slide-in-from-bottom {
   animation-name: slide-in-from-bottom;
+}
+
+/* Marcadores de precio en Leaflet (divIcon) */
+.price-marker {
+  background: transparent;
+  border: none;
+}
+
+.price-marker-large .price-marker-content {
+  padding: 7px 14px;
+  border-radius: 22px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.price-marker-regional .price-marker-content {
+  padding: 5px 10px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.92;
+}
+
+.price-marker-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.price-marker-content:hover {
+  transform: scale(1.1);
+}
+
+.price-marker-selected .price-marker-content {
+  transform: scale(1.18);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+.capacity-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+  flex-shrink: 0;
+}
+
+.user-location-marker {
+  background: transparent;
+  border: none;
+}
+
+.user-location-dot {
+  position: absolute;
+  inset: 0;
+  background: var(--primary);
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.user-location-pulse {
+  position: absolute;
+  inset: -6px;
+  background: var(--primary);
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: user-location-ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes user-location-ping {
+  75%,
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
 }
 
 /* Leaflet map z-index containment */
