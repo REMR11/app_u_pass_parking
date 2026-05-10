@@ -5,12 +5,20 @@ export default auth((req) => {
   const { pathname } = req.nextUrl;
   const isAuthed = !!req.auth;
 
-  if (pathname.startsWith("/dashboard") && !isAuthed) {
+  // Protected routes - require authentication
+  const protectedPaths = ["/dashboard", "/parking"];
+  const isProtectedPath = protectedPaths.some(
+    (path) => pathname === path || pathname.startsWith(path + "/")
+  );
+
+  // Redirect unauthenticated users to login
+  if (isProtectedPath && !isAuthed) {
     const login = new URL("/login", req.nextUrl.origin);
     login.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(login);
   }
 
+  // Protect API routes
   if (pathname.startsWith("/api/parking") && !isAuthed) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
@@ -23,5 +31,10 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/api/parking/:path*", "/api/payments/:path*"],
+  matcher: [
+    "/dashboard/:path*",
+    "/parking/:path*",
+    "/api/parking/:path*",
+    "/api/payments/:path*",
+  ],
 };

@@ -144,6 +144,9 @@ export function ParkingMap({
 
     loadLeaflet();
 
+    // Store ref values for cleanup to avoid stale ref warnings
+    const currentMarkers = markersRef.current;
+    
     return () => {
       if (mapInstanceRef.current) {
         // Stop any in-progress animations before removing to avoid
@@ -151,11 +154,11 @@ export function ParkingMap({
         try {
           mapInstanceRef.current.stop();
           mapInstanceRef.current.remove();
-        } catch (_) {
+        } catch {
           // Silently ignore errors during cleanup
         }
         mapInstanceRef.current = null;
-        markersRef.current.clear();
+        currentMarkers.clear();
         userMarkerRef.current = null;
       }
     };
@@ -316,10 +319,10 @@ export function ParkingMap({
   // Expose zoom controls to parent via window events
   useEffect(() => {
     const handleZoomIn = () => {
-      try { if (mapInstanceRef.current) mapInstanceRef.current.zoomIn(); } catch (_) {}
+      try { if (mapInstanceRef.current) mapInstanceRef.current.zoomIn(); } catch { /* ignore */ }
     };
     const handleZoomOut = () => {
-      try { if (mapInstanceRef.current) mapInstanceRef.current.zoomOut(); } catch (_) {}
+      try { if (mapInstanceRef.current) mapInstanceRef.current.zoomOut(); } catch { /* ignore */ }
     };
     window.addEventListener("map-zoom-in", handleZoomIn);
     window.addEventListener("map-zoom-out", handleZoomOut);
