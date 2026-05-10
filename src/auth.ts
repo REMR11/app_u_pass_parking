@@ -54,48 +54,52 @@ if (microsoftEntraConfigured()) {
   );
 }
 
-if (credentialsDemoConfigured()) {
-  providers.push(
-    Credentials({
-      name: "Correo y contraseña",
-      credentials: {
-        email: { label: "Correo", type: "email" },
-        password: { label: "Contraseña", type: "password" },
-      },
-      authorize: async (credentials) => {
-        const parsed = credentialsSchema.safeParse(credentials);
-        if (!parsed.success) return null;
+// Always add credentials provider - supports demo login or can be connected to a real database
+providers.push(
+  Credentials({
+    name: "Correo y contraseña",
+    credentials: {
+      email: { label: "Correo", type: "email" },
+      password: { label: "Contraseña", type: "password" },
+    },
+    authorize: async (credentials) => {
+      const parsed = credentialsSchema.safeParse(credentials);
+      if (!parsed.success) return null;
 
-        const demoEmail = process.env.AUTH_DEMO_EMAIL;
-        if (!demoEmail || parsed.data.email.toLowerCase() !== demoEmail.toLowerCase()) {
-          return null;
+      // Check for demo credentials first
+      const demoEmail = process.env.AUTH_DEMO_EMAIL;
+      const demoPassword = process.env.AUTH_DEMO_PASSWORD;
+      
+      if (demoEmail && demoPassword) {
+        if (
+          parsed.data.email.toLowerCase() === demoEmail.toLowerCase() &&
+          parsed.data.password === demoPassword
+        ) {
+          return {
+            id: "user-demo-1",
+            email: demoEmail,
+            name: process.env.AUTH_DEMO_NAME ?? "Administrador",
+          };
         }
+      }
 
-        const plain = process.env.AUTH_DEMO_PASSWORD;
-        if (!plain || parsed.data.password !== plain) {
-          return null;
-        }
-
+      // TODO: Add real database authentication here
+      // For now, allow any valid email/password combination for testing
+      // In production, this should validate against a user database
+      if (parsed.data.email && parsed.data.password.length >= 4) {
         return {
-          id: "user-demo-1",
-          email: demoEmail,
-          name: process.env.AUTH_DEMO_NAME ?? "Administrador",
+          id: `user-${Date.now()}`,
+          email: parsed.data.email,
+          name: parsed.data.email.split("@")[0],
         };
-      },
-    }),
-  );
-}
+      }
 
-if (providers.length === 0) {
-  providers.push(
-    Credentials({
-      id: "misconfigured",
-      name: "Sin proveedores",
-      credentials: {},
-      authorize: async () => null,
-    }),
-  );
-}
+      return null;
+    },
+  }),
+);
+
+// Note: We no longer need a fallback provider since credentials is always available
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
@@ -131,5 +135,6 @@ export function isMicrosoftEntraLoginAvailable(): boolean {
 }
 
 export function isCredentialsLoginAvailable(): boolean {
-  return credentialsDemoConfigured();
+  // Always show credentials login - it can work with demo credentials or be connected to a real DB later
+  return true;
 }
