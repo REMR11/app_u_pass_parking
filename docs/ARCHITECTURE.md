@@ -9,16 +9,21 @@ Base **mantenible** para gestión de acceso a estacionamiento en **varios edific
 1. **`src/app/`** — Rutas, layouts y composición. Mínima lógica de negocio.
 2. **`src/components/`** — UI reutilizable (presentación).
 3. **`src/domain/`** — Tipos y reglas de negocio puras (sin I/O).
-4. **`src/lib/`** — Adaptadores: almacenes en memoria, integración futura con DB y PSP.
+4. **`src/lib/`** — Adaptadores: almacenes en memoria, integración futura con DB, PSP y **notificaciones** (`src/lib/notifications/`).
 5. **`src/config/`** — Lectura de `process.env` para tenant y textos.
 6. **`src/app/api/`** — Route Handlers HTTP (JSON). Autenticación vía sesión + middleware.
 
 ## Autenticación
 
-- **NextAuth v5** con proveedor **Credentials** y usuario demo definido por variables de entorno (contraseña en texto solo para desarrollo; en producción usar OAuth o backend propio).
-- **`src/middleware.ts`** protege `/dashboard/*` y APIs bajo `/api/parking/*` y `/api/payments/*`, y refresca la sesión de **Supabase Auth** cuando están configuradas las variables (ver [docs/SUPABASE.md](SUPABASE.md)).
+- **NextAuth v5** con **Microsoft Entra ID** opcional (`AUTH_MICROSOFT_ENTRA_ID_*`) y credenciales demo opcionales (`AUTH_DEMO_*`).
+- **`src/middleware.ts`** protege `/dashboard/*` y APIs bajo `/api/parking/*` y `/api/payments/*`.
+- Guía Azure: [docs/MICROSOFT_ENTRA_ID.md](docs/MICROSOFT_ENTRA_ID.md).
 
-Sustituir credenciales demo por proveedor OAuth (Google, Azure AD) o base de usuarios sin cambiar el patrón de middleware.
+Sustituir o desactivar credenciales demo en producción; preferir solo Entra u otro IdP.
+
+## Notificaciones
+
+Correo transaccional (Resend opcional): [docs/NOTIFICATIONS.md](docs/NOTIFICATIONS.md). Bienvenida opcional tras `signIn` según `NOTIFICATIONS_WELCOME`.
 
 ## Supabase (opcional)
 
@@ -26,11 +31,11 @@ Cliente en `src/utils/supabase/` (`server`, `client`, `middleware`). Sin `NEXT_P
 
 ## Multi-tenant
 
-Variables `NEXT_PUBLIC_*` y activos en `public/tenant/`. Cada cliente puede tener su propio despliegue o, en el futuro, resolución de tenant por subdominio leyendo la misma `getTenantConfig()` extendida.
+Variables `NEXT_PUBLIC_*` y activos en `public/tenant/`. Detalle: [docs/TENANT_WHITELABEL.md](docs/TENANT_WHITELABEL.md).
 
 ## Pagos
 
-`POST /api/payments/intent` valida entrada con **Zod** y delega en `createMobilePaymentIntent` (`src/lib/payments/mobile-intent.ts`). Hoy devuelve un stub; el siguiente paso es llamar al PSP y persistir el estado.
+`POST /api/payments/intent` valida entrada con **Zod** y delega en `createMobilePaymentIntent` (`src/lib/payments/mobile-intent.ts`). Hoy devuelve un stub; extensión PSP: [docs/PAYMENTS_PSP.md](docs/PAYMENTS_PSP.md).
 
 ## Datos de edificios
 

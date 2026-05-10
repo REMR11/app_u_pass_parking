@@ -15,7 +15,14 @@ export default auth(async (req) => {
   const { pathname } = req.nextUrl;
   const isAuthed = !!req.auth;
 
-  if (pathname.startsWith("/dashboard") && !isAuthed) {
+  // Protected routes - require authentication
+  const protectedPaths = ["/dashboard", "/parking"];
+  const isProtectedPath = protectedPaths.some(
+    (path) => pathname === path || pathname.startsWith(path + "/")
+  );
+
+  // Redirect unauthenticated users to login
+  if (isProtectedPath && !isAuthed) {
     const login = new URL("/login", req.nextUrl.origin);
     login.searchParams.set("callbackUrl", pathname);
     const redirect = NextResponse.redirect(login);
@@ -23,6 +30,7 @@ export default auth(async (req) => {
     return redirect;
   }
 
+  // Protect API routes
   if (pathname.startsWith("/api/parking") && !isAuthed) {
     const res = NextResponse.json({ error: "No autorizado" }, { status: 401 });
     copyCookies(supabaseResponse, res);
@@ -40,10 +48,9 @@ export default auth(async (req) => {
 
 export const config = {
   matcher: [
-    /*
-     * Ejecutar Supabase session refresh en casi todas las rutas (recomendación oficial).
-     * Excluye estáticos e imágenes optimizadas.
-     */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/dashboard/:path*",
+    "/parking/:path*",
+    "/api/parking/:path*",
+    "/api/payments/:path*",
   ],
 };

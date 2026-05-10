@@ -30,10 +30,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
+    <html lang="es" className="bg-background">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-[family-name:var(--font-geist-sans)]`}
-        style={{ "--tenant-primary-hue": tenant.primaryHue } as React.CSSProperties}
       >
         <AuthSessionProvider>{children}</AuthSessionProvider>
       </body>
