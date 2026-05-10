@@ -1,14 +1,23 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createBrowserClient } from "@supabase/ssr";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+function hasBrowserSupabaseEnv(): boolean {
+  return Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() &&
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim(),
+  );
+}
 
-export function createClient() {
-  if (!supabaseUrl?.trim() || !supabaseKey?.trim()) {
+/** Cliente en el navegador (p. ej. OAuth). */
+export function createBrowserSupabaseClient(): SupabaseClient {
+  if (!hasBrowserSupabaseEnv()) {
     throw new Error(
-      "Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY. Copy .env.example to .env.local.",
+      "Faltan variables públicas de Supabase. Revisa NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY.",
     );
   }
 
-  return createBrowserClient(supabaseUrl, supabaseKey);
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  );
 }

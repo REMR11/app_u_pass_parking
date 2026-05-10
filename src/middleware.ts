@@ -1,36 +1,37 @@
-import { auth } from "@/auth";
 import { updateSession } from "@/utils/supabase/middleware";
+import { hasSupabaseCredentials } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-/** Propaga cookies de Supabase (p. ej. sesión refrescada) a otra respuesta (redirect / JSON). */
 function copyCookies(from: NextResponse, to: NextResponse) {
   from.cookies.getAll().forEach((cookie) => {
     to.cookies.set(cookie.name, cookie.value);
   });
 }
 
-export default auth(async (req) => {
-  const supabaseResponse = await updateSession(req);
+export async function middleware(request: NextRequest) {
+  if (!hasSupabaseCredentials()) {
+    return NextResponse.next();
+  }
 
-  const { pathname } = req.nextUrl;
-  const isAuthed = !!req.auth;
+  const { response: supabaseResponse, user } = await updateSession(request);
+  const isAuthed = !!user;
 
-  // Protected routes - require authentication
+  const { pathname } = request.nextUrl;
+
   const protectedPaths = ["/dashboard", "/parking"];
   const isProtectedPath = protectedPaths.some(
-    (path) => pathname === path || pathname.startsWith(path + "/")
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
   );
 
-  // Redirect unauthenticated users to login
   if (isProtectedPath && !isAuthed) {
-    const login = new URL("/login", req.nextUrl.origin);
+    const login = new URL("/login", request.nextUrl.origin);
     login.searchParams.set("callbackUrl", pathname);
     const redirect = NextResponse.redirect(login);
     copyCookies(supabaseResponse, redirect);
     return redirect;
   }
 
-  // Protect API routes
   if (pathname.startsWith("/api/parking") && !isAuthed) {
     const res = NextResponse.json({ error: "No autorizado" }, { status: 401 });
     copyCookies(supabaseResponse, res);
@@ -44,7 +45,7 @@ export default auth(async (req) => {
   }
 
   return supabaseResponse;
-});
+}
 
 export const config = {
   matcher: [
@@ -52,5 +53,6 @@ export const config = {
     "/parking/:path*",
     "/api/parking/:path*",
     "/api/payments/:path*",
+    "/auth/callback",
   ],
 };

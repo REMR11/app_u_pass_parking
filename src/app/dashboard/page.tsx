@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import { signOutAction } from "@/app/auth/actions";
 import { getTenantConfig } from "@/config/tenant";
-import { signOutAction } from "@/app/actions/auth";
+import { getSessionUser, getUserDisplayName } from "@/lib/auth/session";
 
 function SignOutButton() {
   return (
@@ -26,33 +26,27 @@ function ChevronRightIcon({ className }: { className?: string }) {
 }
 
 export default async function DashboardHome() {
-  const session = await auth();
-  if (!session?.user) {
+  const user = await getSessionUser();
+  if (!user) {
     redirect("/login");
   }
 
   const tenant = getTenantConfig();
+  const displayName = getUserDisplayName(user);
+  const initial = displayName[0]?.toUpperCase() ?? user.email?.[0]?.toUpperCase() ?? "U";
 
   return (
     <div className="space-y-6 lg:space-y-8">
-      {/* User profile header - Mobile optimized */}
       <div className="flex items-center gap-4 p-4 lg:p-0 -mx-4 lg:mx-0 bg-primary/5 lg:bg-transparent rounded-b-3xl lg:rounded-none">
         <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-          <span className="text-2xl font-bold text-white">
-            {session.user.name?.[0]?.toUpperCase() || session.user.email?.[0]?.toUpperCase() || "U"}
-          </span>
+          <span className="text-2xl font-bold text-white">{initial}</span>
         </div>
         <div className="flex-1 min-w-0">
-          <h1 className="text-xl font-bold text-foreground truncate">
-            {session.user.name || "Usuario"}
-          </h1>
-          <p className="text-sm text-muted-foreground truncate">
-            {session.user.email}
-          </p>
+          <h1 className="text-xl font-bold text-foreground truncate">{displayName}</h1>
+          <p className="text-sm text-muted-foreground truncate">{user.email}</p>
         </div>
       </div>
 
-      {/* Quick actions - Mobile card style */}
       <div className="space-y-3">
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider px-1">
           Acciones rápidas
@@ -113,7 +107,6 @@ export default async function DashboardHome() {
         </div>
       </div>
 
-      {/* Admin section - Only show on larger screens or if needed */}
       <div className="space-y-3 hidden lg:block">
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider px-1">
           Administración
@@ -129,22 +122,19 @@ export default async function DashboardHome() {
         </div>
       </div>
 
-      {/* App info */}
       <div className="space-y-3">
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider px-1">
           Información
         </h2>
         <div className="p-4 rounded-2xl bg-muted/50 border border-foreground/5">
           <p className="text-sm text-muted-foreground">
-            <strong className="text-foreground">{tenant.appName}</strong> - Estacionamiento inteligente para edificios corporativos.
+            <strong className="text-foreground">{tenant.appName}</strong> — Estacionamiento inteligente para edificios
+            corporativos.
           </p>
-          <p className="text-xs text-muted-foreground/70 mt-2">
-            Soporte: {tenant.supportEmail}
-          </p>
+          <p className="text-xs text-muted-foreground/70 mt-2">Soporte: {tenant.supportEmail}</p>
         </div>
       </div>
 
-      {/* Sign out */}
       <div className="pt-4">
         <SignOutButton />
       </div>
