@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { ParkingGrid } from "@/components/parking/parking-grid";
 import { SlotDetailsSheet } from "@/components/parking/slot-details-sheet";
+import { ReservationModule } from "@/components/parking/reservation-module";
 import { ParkingMap, type FilterMode } from "@/components/parking/parking-map";
 import { ParkingListCard } from "@/components/parking/parking-list-card";
 import { LevelSelector } from "@/components/parking/level-selector";
@@ -28,6 +29,7 @@ export default function ParkingPage() {
   const [showLotSheet, setShowLotSheet] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showReservationModule, setShowReservationModule] = useState(false);
 
   // Detect mobile
   useEffect(() => {
@@ -122,11 +124,24 @@ export default function ParkingPage() {
     }
   };
 
-  // Handle reservation
+  // Handle reservation - opens the reservation module
   const handleReserve = () => {
     if (selectedSlot && selectedLot) {
-      alert(`Reservando lugar ${selectedSlot.code} en ${selectedLot.name}`);
+      setShowReservationModule(true);
     }
+  };
+
+  // Handle reservation completion
+  const handleReservationComplete = (reservationId: string) => {
+    console.log("Reservation completed:", reservationId);
+    setShowReservationModule(false);
+    setSelectedSlot(null);
+    setViewMode("map");
+  };
+
+  // Handle reservation module close
+  const handleReservationClose = () => {
+    setShowReservationModule(false);
   };
 
   // Map center
@@ -248,6 +263,18 @@ export default function ParkingPage() {
           onReserve={handleReserve}
           onClose={() => setSelectedSlot(null)}
         />
+
+        {/* Reservation Module */}
+        {showReservationModule && selectedSlot && currentLevel && selectedLot && (
+          <ReservationModule
+            slot={selectedSlot}
+            level={currentLevel}
+            lot={selectedLot}
+            userLocation={userLocation}
+            onClose={handleReservationClose}
+            onComplete={handleReservationComplete}
+          />
+        )}
       </div>
     );
   }
@@ -530,6 +557,18 @@ export default function ParkingPage() {
           onReserve={handleReserve}
           onClose={() => setSelectedSlot(null)}
         />
+
+        {/* Reservation Module */}
+        {showReservationModule && selectedSlot && currentLevel && selectedLot && (
+          <ReservationModule
+            slot={selectedSlot}
+            level={currentLevel}
+            lot={selectedLot}
+            userLocation={userLocation}
+            onClose={handleReservationClose}
+            onComplete={handleReservationComplete}
+          />
+        )}
       </div>
     );
   }
